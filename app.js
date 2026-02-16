@@ -1,7 +1,6 @@
 import createError from "http-errors";
 import express from "express";
 import path from "path";
-import { fileURLToPath } from 'url';
 import cookieParser from "cookie-parser";
 import logger from "morgan"
 import { indexRouter } from "./routes/index.js"
@@ -10,8 +9,7 @@ import { usersRouter } from "./routes/users.js"
 const app = express();
 
 // __direname is not available in modules scope, so we define it
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = import.meta.dirname;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
