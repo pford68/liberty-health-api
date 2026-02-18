@@ -4,8 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node ./bin/www",
-    "lint": "npx eslint"
+    "clean": "rm -rf dist",
+    "build": "tsc",
+    "clean-build": "npm run clean && npm run build",
+    "deploy": "npm run build && npm run start",
+    "check": "tsc --noEmit",
+    "start": "node dist/server.js",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
+    "lint": "eslint 'src/**/*.ts'"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
@@ -18,9 +24,26 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.6",
+    "@types/helmet": "^0.0.48",
+    "@types/http-status-codes": "^1.2.0",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^25.2.3",
+    "@types/uuid": "^10.0.0",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.3.1",
     "eslint": "^9.39.2",
     "globals": "^17.3.0",
-    "typescript-eslint": "^8.55.0"
+    "helmet": "^8.1.0",
+    "http-status-codes": "^2.3.0",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.55.0",
+    "uuid": "^13.0.0"
   }
 }
