@@ -15,6 +15,7 @@ const __dirname = import.meta.dirname;
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+app.disable('x-powered-by');  // Hide the fact that we are using express.
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -23,7 +24,6 @@ app.use(cors())
 app.use(helmet())
 app.use(cookieParser());
 app.use("/api/users/", userRouter);
-app.use(errorHandler)
-
+app.use(errorHandler);
 
 export default app;

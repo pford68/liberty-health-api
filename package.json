@@ -18,9 +18,11 @@
     "cors": "^2.8.6",
     "debug": "~2.6.9",
     "express": "5.0.0",
+    "express-validator": "^7.3.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
-    "morgan": "~1.9.1"
+    "morgan": "~1.9.1",
+    "mysql2": "^3.17.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -32,7 +34,7 @@
     "@types/helmet": "^0.0.48",
     "@types/http-status-codes": "^1.2.0",
     "@types/morgan": "^1.9.10",
-    "@types/node": "^25.2.3",
+    "@types/node": "^25.3.0",
     "@types/uuid": "^10.0.0",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.3.1",
