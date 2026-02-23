@@ -6,6 +6,7 @@ import cors from "cors";
 import helmet from "helmet";
 import errorHandler from "./routes/errorHandler.js";
 import userRouter from "./routes/userRoutes.js";
+import applicantRouter from "./routes/applicantRoutes.js";
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(cors())
 app.use(helmet())
 app.use(cookieParser());
 app.use("/api/users/", userRouter);
+app.use("/api/form/", applicantRouter);
 app.use(errorHandler);
 
 export default app;
