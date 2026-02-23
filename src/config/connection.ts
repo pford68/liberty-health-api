@@ -45,16 +45,18 @@ class PostgresConnection extends AbstractConnection {
 }
 
 function connectionFactory() {
-    const opts = {
-        host: process.env.LIBERTY_HOST,
-        database: process.env.LIBERTY_DB,
-        user: process.env.LIBERTY_USER,
-        password: process.env.LIBERTY_PWD
+    const onMissingProp = (p: string) => {
+        throw new Error(`The env variable ${p} is missing.`);
+    }
+    const opts: ConnectionParams = {
+        host: process.env.LIBERTY_HOST ?? (() => onMissingProp("LIBERTY_HOST"))(),
+        database: process.env.LIBERTY_DB ?? (() => onMissingProp("LIBERTY_DB"))(),
+        user: process.env.LIBERTY_USER ?? (() => onMissingProp("LIBERTY_USER"))(),
+        password: process.env.LIBERTY_PWD ?? (() => onMissingProp("LIBERTY_PWD"))()
     }
 
     switch(db_type) {
         case "mysql":
-            // @ts-ignore
             return new MySQLConnection(opts);
         case "postgres":
             return new PostgresConnection();
