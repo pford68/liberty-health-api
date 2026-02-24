@@ -10,7 +10,7 @@ import applicantRouter from "./routes/applicantRoutes.js";
 
 const app = express();
 
-// __direname is not available in modules scope, so we define it
+// __dirname is not available in modules scope, so we define it
 const __dirname = import.meta.dirname;
 
 // view engine setup
