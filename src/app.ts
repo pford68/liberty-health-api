@@ -7,6 +7,8 @@ import helmet from "helmet";
 import errorHandler from "./routes/errorHandler.js";
 import userRouter from "./routes/userRoutes.js";
 import applicantRouter from "./routes/applicantRoutes.js";
+import referenceRouter from "./routes/referenceRoutes.js";
+import jobRouter from "./routes/jobHistoryRoutes.js";
 
 const app = express();
 
@@ -26,6 +28,8 @@ app.use(helmet())
 app.use(cookieParser());
 app.use("/api/users/", userRouter);
 app.use("/api/form/", applicantRouter);
+app.use("/api/form/references/", referenceRouter);
+app.use("/api/form/jobs/", jobRouter);
 app.use(errorHandler);
 
 export default app;

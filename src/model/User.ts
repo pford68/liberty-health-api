@@ -1,27 +1,34 @@
-import Person from "./Person.js";
-
 export interface UserUpdate {
     firstName?: string;
     lastName?: string;
     password?: string;
     email?: string;
-    authenticated?: boolean;
+    authenticated?: boolean,
+    admin?: boolean
 }
 
-export default class User extends Person {
+export default class User {
     #id: number
+    #userName: string
+    #email: string
     #authenticated: boolean
+    #admin: boolean
 
     constructor(
         id: number,
-        firstName: string,
-        lastName: string,
+        userName: string,
         email: string,
-        authenticated: boolean
+        admin: number
     ) {
-        super(firstName, lastName, email);
         this.#id = id;
-        this.#authenticated = authenticated;
+        this.#userName = userName;
+        this.#email = email;
+        this.#authenticated = id != null;
+        this.#admin = admin === 1;
+    }
+
+    get admin(): boolean {
+        return this.#admin;
     }
 
     get id(): number {
@@ -32,8 +39,27 @@ export default class User extends Person {
         return this.#authenticated;
     }
 
+    get email(): string {
+        return this.#email;
+    }
+
+
+    get userName(): string {
+        return this.#userName;
+    }
+
     update(args: UserUpdate): void {
         // Validate properties
         // Update properties
+    }
+
+    toJSON(): unknown {
+        return {
+            "id": this.id,
+            "userName": `${this.userName}`,
+            "email": `${this.email}`,
+            "authenticated": this.authenticated,
+            "admin": this.admin,
+        }
     }
 }

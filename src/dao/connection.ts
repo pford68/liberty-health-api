@@ -1,14 +1,15 @@
 import dotenv from "dotenv";
-import mysql, {type FieldPacket, type QueryResult, type RowDataPacket} from 'mysql2/promise';
+import mysql, {type RowDataPacket} from 'mysql2/promise';
 
 dotenv.config();
-const db_type = process.env["LIBERTY_DB_TYPE"];
+const dbType = process.env["LIBERTY_DB_TYPE"];
 
 interface ConnectionParams {
     host: string
     user: string
     password: string
-    database: string
+    database: string,
+    namedPlaceholders: boolean
 }
 
 type Value =
@@ -29,9 +30,9 @@ class AbstractConnection {
     constructor() {
     }
 
-    execute(preparedStatement:string, values:unknown[]): Promise<unknown>{
+    execute(preparedStatement:string, values:unknown[]): Promise<RowDataPacket[] | undefined>{
         return new Promise((resolve, reject) => {
-            resolve([[], []]);
+            resolve(undefined);
         })
     }
 }
@@ -44,11 +45,11 @@ class MySQLConnection extends AbstractConnection {
         this.#options = options;
     }
 
-    async execute(preparedStatement:string, values:Value[]):Promise<RowDataPacket | undefined> {
+    async execute(preparedStatement:string, values:Value[]):Promise<RowDataPacket[] | undefined> {
         const conn = await mysql.createConnection(this.#options);
         try {
             const [results] = await conn.execute<RowDataPacket[]>(preparedStatement, values);
-            return results[0];
+            return results;
         } catch (e) {
             throw new Error("Error creating mysql connection.");
         }
@@ -67,10 +68,11 @@ function connectionFactory() {
         host: process.env.LIBERTY_HOST ?? (() => onMissingProp("LIBERTY_HOST"))(),
         database: process.env.LIBERTY_DB ?? (() => onMissingProp("LIBERTY_DB"))(),
         user: process.env.LIBERTY_USER ?? (() => onMissingProp("LIBERTY_USER"))(),
-        password: process.env.LIBERTY_PWD ?? (() => onMissingProp("LIBERTY_PWD"))()
+        password: process.env.LIBERTY_PWD ?? (() => onMissingProp("LIBERTY_PWD"))(),
+        namedPlaceholders: true,
     }
 
-    switch(db_type) {
+    switch(dbType) {
         case "mysql":
             return new MySQLConnection(opts);
         case "postgres":

@@ -2,14 +2,14 @@ import {Router} from "express";
 import {
     save,
     cancel,
-    getApplicationByEmail,
+    getApplication,
     update
 } from "../services/applicantService.js";
 
 const applicantRouter = Router();
 
-applicantRouter.get("/:email", getApplicationByEmail);
-applicantRouter.post("/:applicantId", save);
+applicantRouter.get("/search", getApplication);
+applicantRouter.post("/", save);
 applicantRouter.put("/:applicantId", update);
 applicantRouter.delete("/:applicantId", cancel);
 

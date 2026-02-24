@@ -14,6 +14,42 @@ VALUES
     )
 ;
 
+INSERT INTO users
+(
+    user_name,
+    email,
+    date_created,
+    password
+)
+VALUES
+    (
+        "afeh",
+        "afeh@libertycare.health",
+        NOW(),
+        "$2b$12$LpgNjQmr4Hz88u5u8Gq34e6Bit8mIEbh0Y.5EUIoRFfP2jyUCvteO"
+    )
+;
+
+INSERT INTO applicants
+(
+    first_name,
+    last_name,
+    position_id,
+    status_id,
+    email,
+    phone
+)
+VALUES
+    (
+        "Luka",
+        "Doncic",
+        2,
+        1,
+         "ldoncic@gmail.com",
+        "469-444-9012"
+    )
+;
+
 INSERT INTO status
     (value)
 VALUES
