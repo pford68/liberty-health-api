@@ -18,6 +18,7 @@ class ApplicantDao {
         const result = results?.[0];
         return result != undefined
             ? new Applicant(
+                result["applicant_id"],
                 result["first_name"],
                 result["last_name"],
                 result["email"],
@@ -29,21 +30,20 @@ class ApplicantDao {
     }
 
     async save(applicant: Applicant) {
+        const stmt = [
+            "INSERT INTO applicants (first_name, last_name, position_id, status_id, email, phone)",
+            "values (:firstName, :lastName, :position, :status, :email, :phone)",
+        ].join(" ");
         const params = {
             firstName: applicant.firstName,
             lastName: applicant.lastName,
             email: applicant.email,
             phone: applicant.phone,
             position: applicant.position.id,
-            status: applicant.status.id
+            status: applicant.status.id,
         };
-        const stmt = [
-            "INSERT INTO applicants (first_name, last_name, position_id, status_id, email, phone)",
-            "values (:firstName, :lastName, :position, :status, :email, :phone)",
-        ].join(" ");
-        // @ts-ignore
-        const result = connection.execute(stmt, params);
-        return result !== undefined;
+        const {id} = await connection.save(stmt, params) ?? {};
+        return id ?? 0;
     }
 
     async update(applicant: Applicant) {
@@ -54,15 +54,8 @@ class ApplicantDao {
             "position_id = position:, status_id = :status",
             "WHERE applicant_id = :applicantId",
         ].join(" ");
-        return this.#upsert(applicant, stmt);
-    }
-
-    async cancel(id: number) {
-
-    }
-
-    async #upsert(applicant: Applicant, stmt: string) {
         const params = {
+            applicantId: applicant.id,
             firstName: applicant.firstName,
             lastName: applicant.lastName,
             email: applicant.email,
@@ -70,9 +63,12 @@ class ApplicantDao {
             position: applicant.position.id,
             status: applicant.status.id,
         };
-        // @ts-ignore
-        const result = connection.execute(stmt, params);
-        return result !== undefined;
+        const {affectedRows} = await connection.save(stmt, params) ?? {};
+        return (affectedRows ?? 0) > 0;
+    }
+
+    async cancel(id: number) {
+
     }
 }
 

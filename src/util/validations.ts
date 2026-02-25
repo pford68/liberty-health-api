@@ -12,3 +12,7 @@ export function isPhone(text:string): boolean {
 export function isString(s:unknown): boolean {
     return typeof s === "string";
 }
+
+export function isEmpty(s:unknown): boolean {
+    return s === null || s === undefined;
+}

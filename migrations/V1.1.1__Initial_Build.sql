@@ -47,6 +47,7 @@ CREATE TABLE job_history (
     job_id INT NOT NULL AUTO_INCREMENT,
     applicant_id INT,
     title VARCHAR(50) NOT NULL,
+    company VARCHAR(255) NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE,
     reason_ended VARCHAR(255) NOT NULL,

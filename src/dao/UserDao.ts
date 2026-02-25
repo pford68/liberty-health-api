@@ -11,28 +11,32 @@ class UserDao {
             "WHERE user_id = ? AND active = 1",
         ].join(" ");
         const results = await connection.execute(stmt, [userId]);
-        const r = results?.[0];
-        return r !== undefined
-            ? new User(r["user_id"], r["user_name"],r["email"], r["admin"])
+        const row = results?.[0];
+        return row !== undefined
+            ? this.#transform(row)
             : undefined;
     }
 
     async getActiveUsers() {
         const stmt = "SELECT user_id, user_name, email, admin FROM users WHERE active = 1";
         const results = await connection.execute(stmt, []);
-        const users: User[] = [];
-        results?.forEach((u: RowDataPacket) => {
-            const user = new User(u["user_id"], u["user_name"],u["email"], u["admin"]);
-            users.push(user);
-        });
-        return users;
+        return results?.map((row:RowDataPacket) => {
+            return this.#transform(row);
+        }) ?? []
     }
 
     deleteUser(id: number) {
 
     }
 
-
+    #transform(row:RowDataPacket): User {
+        return new User(
+            row["user_id"],
+            row["user_name"],
+            row["email"],
+            row["admin"]
+        )
+    }
 }
 
 export default new UserDao();

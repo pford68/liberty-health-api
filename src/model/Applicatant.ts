@@ -1,12 +1,21 @@
 import Person from "./Person.js";
 import {isEmail, isString} from "../util/validations.js";
-import {Job} from "./Job.js";
-import {JobReference} from "./JobReference.js";
+import Job from "./Job.js";
+import JobReference from "./JobReference.js";
 
+interface ApplicantPayload {
+    id: number,
+    firstName: string,
+    lastName: string,
+    phone: string,
+    email: string,
+    position: { id: number, title: string},
+    status: {id: number, value: string}
+}
 
 export class Position {
-    #id: number
-    #title: string
+    #id: number;
+    #title: string;
     
     constructor(id:number, title:string) {
         this.#id = id;
@@ -31,8 +40,8 @@ export class Position {
 }
 
 export class Status {
-    #id: number
-    #value: string
+    #id: number;
+    #value: string;
 
     constructor(id:number, value:string) {
         this.#id = id;
@@ -58,13 +67,26 @@ export class Status {
 
 
 export default class Applicant extends Person {
-    #references: JobReference[]
-    #position: Position
-    #jobHistory: Job[]
-    #status: Status
+    #id: number | null;
+    #references: JobReference[];
+    #position: Position;
+    #jobHistory: Job[];
+    #status: Status;
 
+    static create(data: ApplicantPayload): Applicant {
+        return new Applicant(
+            data.id,
+            data.firstName,
+            data.lastName,
+            data.email,
+            new Position(data.position.id, data.position.title),
+            new Status(data.status.id, data.status.value),
+            data.phone
+        );
+    }
 
     constructor(
+        id: number | null,
         firstName: string,
         lastName: string,
         email: string,
@@ -73,10 +95,16 @@ export default class Applicant extends Person {
         phone: string
     ) {
         super(firstName, lastName, email, phone);
+        this.#id = null;
         this.#references = [];
         this.#position = position;
         this.#jobHistory = [];
         this.#status = status;
+    }
+
+
+    get id(): number | null {
+        return this.#id;
     }
 
     get status(): Status {
@@ -138,6 +166,7 @@ export default class Applicant extends Person {
 
     toJSON(): unknown {
         return {
+            id: this.id ?? undefined,
             firstName: this.firstName,
             lastNme: this.lastName,
             email: this.email,

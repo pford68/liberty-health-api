@@ -1,5 +1,5 @@
 import {Router} from "express";
-import {cancel, getById, save, update} from "../services/referenceServices.js";
+import {cancel, getById, save, update} from "../services/referenceService.js";
 
 const referenceRouter = Router();
 

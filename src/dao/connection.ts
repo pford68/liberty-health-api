@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import mysql, {type RowDataPacket} from 'mysql2/promise';
+import mysql, {type ResultSetHeader, type RowDataPacket} from 'mysql2/promise';
 
 dotenv.config();
 const dbType = process.env["LIBERTY_DB_TYPE"];
@@ -25,12 +25,23 @@ type Value =
     | Record<string, unknown> // Object
     | ({} | null)[]; // Array of values
 
+interface SaveStatus {
+    id: number,
+    affectedRows: number
+}
+
 
 class AbstractConnection {
     constructor() {
     }
 
-    execute(preparedStatement:string, values:unknown[]): Promise<RowDataPacket[] | undefined>{
+    execute(preparedStatement:string, values:Value[]): Promise<RowDataPacket[] | undefined>{
+        return new Promise((resolve, reject) => {
+            resolve(undefined);
+        })
+    }
+
+    save(preparedStatement:string, values:{ [key: string]: any }): Promise<SaveStatus | undefined>{
         return new Promise((resolve, reject) => {
             resolve(undefined);
         })
@@ -46,12 +57,25 @@ class MySQLConnection extends AbstractConnection {
     }
 
     async execute(preparedStatement:string, values:Value[]):Promise<RowDataPacket[] | undefined> {
-        const conn = await mysql.createConnection(this.#options);
         try {
+            const conn = await mysql.createConnection(this.#options);
             const [results] = await conn.execute<RowDataPacket[]>(preparedStatement, values);
             return results;
         } catch (e) {
-            throw new Error("Error creating mysql connection.");
+            throw new Error(`An error occurred while executing a query: ${(e as Error).message}`);
+        }
+    }
+
+    async save(preparedStatement:string, values:{ [key: string]: any }):Promise<SaveStatus | undefined> {
+        try {
+            const conn = await mysql.createConnection(this.#options);
+            const [header] = await conn.execute<ResultSetHeader>(preparedStatement, values);
+            return {
+                id: header.insertId,
+                affectedRows: header.affectedRows,
+            }
+        } catch (e) {
+            throw new Error(`An error occurred while saving records: ${(e as Error).message}`);
         }
     }
 }

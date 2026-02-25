@@ -1,4 +1,4 @@
-import type {JobReference} from "../model/JobReference.js";
+import JobReference from "../model/JobReference.js";
 
 class ReferenceDao {
     getById(id: number) {

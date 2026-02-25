@@ -30,6 +30,27 @@ VALUES
     )
 ;
 
+
+INSERT INTO status
+(value)
+VALUES
+    ("Open"),
+    ("Closed"),
+    ("Rejected"),
+    ("Canceled"),
+    ("Completed")
+;
+
+
+INSERT INTO positions
+(title, abbrev, status_id)
+VALUES
+    ("Director of Nursing", "DON",2),
+    ("Part-time Registered Nurse", "PRN",1),
+    ("Certified Nursing Assistant", "CNA", 1)
+;
+
+
 INSERT INTO applicants
 (
     first_name,
@@ -48,24 +69,6 @@ VALUES
          "ldoncic@gmail.com",
         "469-444-9012"
     )
-;
-
-INSERT INTO status
-    (value)
-VALUES
-    ("Open"),
-    ("Closed"),
-    ("Rejected"),
-    ("Canceled"),
-    ("Completed")
-;
-
-INSERT INTO positions
-    (title, abbrev, status_id)
-VALUES
-    ("Director of Nursing", "DON",2),
-    ("Part-time Registered Nurse", "PRN",1),
-    ("Certified Nursing Assistant", "CNA", 1)
 ;
 
 UPDATE users SET admin = 1 WHERE user_id = 1;

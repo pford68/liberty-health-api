@@ -1,6 +1,5 @@
 import {isString} from "../util/validations.js";
-
-import {JobReference} from "./JobReference.js";
+import JobReference from "./JobReference.js";
 
 export interface Location {
     city: string,
@@ -9,10 +8,25 @@ export interface Location {
 }
 
 export interface Company {
-    name: string
+    name: string,
+    address1: string,
+    address2: string,
+    phone: string
 }
 
-export class Job {
+interface JobPayload {
+    id: number | null
+    title: string
+    startDate: Date
+    endDate?: Date
+    reasonForLeaving: string
+    supervisor: JobReference
+    company: Company
+    location: Location
+}
+
+export default class Job {
+    #id: number | null
     #title: string
     #startDate?: Date
     #endDate?: Date
@@ -21,12 +35,27 @@ export class Job {
     #company?: Company
     #location?: Location
 
-    constructor(
-        title: string
-    ) {
+    static create(data: JobPayload): Job {
+        const job = new Job(data.id, data.title);
+        job.company = data.company;
+        job.startDate = data.startDate;
+        if (data.endDate != undefined) {
+            job.endDate = data.endDate;
+        }
+        job.reasonForLeaving = data.reasonForLeaving;
+        job.supervisor = data.supervisor;
+        job.location = data.location;
+        return job;
+    }
+
+    constructor(id:number | null, title: string) {
+        this.#id = id;
         this.#title = title;
     }
 
+    get id(): number | null {
+        return this.#id;
+    }
 
     get startDate(): Date | undefined {
         return this.#startDate;

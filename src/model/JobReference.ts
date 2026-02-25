@@ -1,7 +1,7 @@
 import Person from "./Person.js";
 import {isEmail, isPhone, isString} from "../util/validations.js";
 
-export class JobReference extends Person {
+export default class JobReference extends Person {
 
     constructor(
         firstName: string,
