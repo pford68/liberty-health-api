@@ -11,6 +11,14 @@ CREATE TABLE status (
      PRIMARY KEY (status_id)
 );
 
+
+CREATE TABLE license_types (
+    license_id INT NOT NULL AUTO_INCREMENT,
+    value VARCHAR(20) NOT NULL,
+    PRIMARY KEY (license_id)
+);
+
+
 CREATE TABLE users (
     user_id INT NOT NULL AUTO_INCREMENT,
     user_name VARCHAR(50) NOT NULL,
@@ -47,17 +55,27 @@ CREATE TABLE job_history (
     job_id INT NOT NULL AUTO_INCREMENT,
     applicant_id INT,
     title VARCHAR(50) NOT NULL,
+    company VARCHAR(255) NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE,
     reason_ended VARCHAR(255) NOT NULL,
-    supervisor VARCHAR(255),
     phone VARCHAR(12) NOT NULL,
     address1 VARCHAR(255),
     address2 VARCHAR(255),
     city VARCHAR(255),
     state VARCHAR(255),
     country VARCHAR(255),
+    description VARCHAR(1024),
     PRIMARY KEY (job_id),
     FOREIGN KEY (applicant_id) REFERENCES applicants (applicant_id)
-);
+)
+;
 
+CREATE TABLE applicant_licenses (
+    applicant_id INT NOT NULL,
+    license_type_id INT NOT NULL,
+    date_expires DATE,
+    state_issued VARCHAR(255),
+    PRIMARY KEY (applicant_id, license_type_id)
+)
+;

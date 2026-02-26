@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD COLUMN active tinyint NOT NULL DEFAULT 1;
