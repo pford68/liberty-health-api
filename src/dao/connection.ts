@@ -35,7 +35,7 @@ class AbstractConnection {
     constructor() {
     }
 
-    execute(preparedStatement:string, values:Value[]): Promise<RowDataPacket[] | undefined>{
+    execute(preparedStatement:string, values:Value[]): Promise<{[p:string]:any}[] | undefined>{
         return new Promise((resolve, reject) => {
             resolve(undefined);
         })
@@ -56,7 +56,7 @@ class MySQLConnection extends AbstractConnection {
         this.#options = options;
     }
 
-    async execute(preparedStatement:string, values:Value[]):Promise<RowDataPacket[] | undefined> {
+    async execute(preparedStatement:string, values:Value[]):Promise<{[p:string]:any}[] | undefined> {
         try {
             const conn = await mysql.createConnection(this.#options);
             const [results] = await conn.execute<RowDataPacket[]>(preparedStatement, values);

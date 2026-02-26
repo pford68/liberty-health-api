@@ -7,9 +7,10 @@ export const save = async (req: Request, res: Response, next: NextFunction) => {
     const { body } = req;
     try {
         const job = Job.create(body);
-        const result = await jobDao.save(job);
+        const id = await jobDao.save(job);
         res
-            .status(201);
+            .status(201)
+            .json({id});
     } catch (e) {
         res
             .status(500)
@@ -18,11 +19,21 @@ export const save = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const update = async (req: Request, res: Response, next: NextFunction) => {
-
+    const { body } = req;
+    try {
+        const job = Job.create(body);
+        const result = await jobDao.update(job);
+        if (!result) throw new Error("Update attempt failed.");
+        res.status(204);
+    } catch (e) {
+        res
+            .status(500)
+            .json({message: (e as Error).message});
+    }
 };
 
 export const cancel = async (req: Request, res: Response, next: NextFunction) => {
-
+    throw new Error("Not implemented");
 };
 
 export const getByUserId = async (req: Request, res: Response, next: NextFunction) => {

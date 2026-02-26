@@ -2,6 +2,9 @@ import Person from "./Person.js";
 import {isEmail, isString} from "../util/validations.js";
 import Job from "./Job.js";
 import JobReference from "./JobReference.js";
+import Position from "./Position.js";
+import Status from "./Status.js";
+import License from "./License.js";
 
 interface ApplicantPayload {
     id: number,
@@ -9,79 +12,56 @@ interface ApplicantPayload {
     lastName: string,
     phone: string,
     email: string,
-    position: { id: number, title: string},
-    status: {id: number, value: string}
-}
-
-export class Position {
-    #id: number;
-    #title: string;
-    
-    constructor(id:number, title:string) {
-        this.#id = id;
-        this.#title = title;
-    }
-
-
-    get id(): number {
-        return this.#id;
-    }
-
-    get title(): string {
-        return this.#title;
-    }
-
-    toJSON(): unknown {
-        return {
-            id: this.id,
-            title: this.title,
-        }
-    }
-}
-
-export class Status {
-    #id: number;
-    #value: string;
-
-    constructor(id:number, value:string) {
-        this.#id = id;
-        this.#value = value;
-    }
-
-
-    get id(): number {
-        return this.#id;
-    }
-
-    get value(): string {
-        return this.#value;
-    }
-
-    toJSON(): unknown {
-        return {
-            id: this.id,
-            value: this.value,
-        }
-    }
+    position: Partial<Position>,
+    status: Partial<Status>,
+    eligibleToWork: boolean,
+    licenses: Partial<License>[],
+    convictions: boolean
 }
 
 
 export default class Applicant extends Person {
-    #id: number | null;
+    #id: number | undefined;
     #references: JobReference[];
-    #position: Position;
+    #position: Partial<Position>;
     #jobHistory: Job[];
-    #status: Status;
+    #status: Partial<Status>;
+    #eligibleToWork: boolean;
+    #licences: Partial<License>[];
+    #convictions: boolean = false;
+    static #table: string = "applicants a";
+    static #columns: {[key:string]: string} = {
+        id: "applicant_id",
+        firstName: "first_name",
+        lastName: "last_name",
+        position: "position_id",
+        status: "status_id",
+        email: "email",
+        phone: "phone",
+        eligibleToWork: "eligible_to_work",
+        conviction: "has_convictions"
+    };
+    static #alias: string = "a";
+
 
     static create(data: ApplicantPayload): Applicant {
+        if (data.position.id === undefined) {
+            throw new Error("Missing position id");
+        }
+        if (data.status.id === undefined) {
+            throw new Error("Missing status id");
+        }
         return new Applicant(
             data.id,
             data.firstName,
             data.lastName,
             data.email,
-            new Position(data.position.id, data.position.title),
-            new Status(data.status.id, data.status.value),
-            data.phone
+            new Position(data.position.id, data.position.title ?? ""),
+            new Status(data.status.id, data.status.value ?? ""),
+            data.phone,
+            data.eligibleToWork,
+            data.licenses,
+            data.convictions
         );
     }
 
@@ -90,24 +70,48 @@ export default class Applicant extends Person {
         firstName: string,
         lastName: string,
         email: string,
-        position: Position,
-        status: Status,
-        phone: string
+        position: Partial<Position>,
+        status: Partial<Status>,
+        phone: string,
+        eligibleToWork: boolean,
+        licenses: Partial<License>[],
+        convictions: boolean
     ) {
         super(firstName, lastName, email, phone);
-        this.#id = null;
+        this.#id = id != null ? id : undefined;
         this.#references = [];
         this.#position = position;
         this.#jobHistory = [];
         this.#status = status;
+        this.#eligibleToWork = eligibleToWork;
+        this.#licences = licenses ?? [];
+        this.#convictions = convictions ?? this.#convictions;
     }
 
 
-    get id(): number | null {
+    static get table(): string {
+        return Applicant.#table;
+    }
+
+    static get columns(): { [p: string]: string } {
+        return Applicant.#columns;
+    }
+
+    static get alias(): string {
+        return this.#alias;
+    }
+
+    static get namedParameters(): string[] {
+        return Object.entries(Applicant.columns).map(([k, v]) => {
+            return `${v} = :${k}`;
+        })
+    }
+
+    get id(): number | undefined {
         return this.#id;
     }
 
-    get status(): Status {
+    get status(): Partial<Status> {
         return this.#status;
     }
 
@@ -123,15 +127,13 @@ export default class Applicant extends Person {
         this.#references = value;
     }
 
-
-    get position(): Position {
+    get position(): Partial<Position> {
         return this.#position;
     }
 
-    set position(value: Position) {
+    set position(value: Partial<Position>) {
         this.#position = value;
     }
-
 
     get jobHistory(): Array<Job> {
         return this.#jobHistory;
@@ -141,6 +143,24 @@ export default class Applicant extends Person {
         this.#jobHistory = value;
     }
 
+    get eligibleToWork(): boolean {
+        return this.#eligibleToWork;
+    }
+
+    get licences(): Partial<License>[] {
+        return this.#licences;
+    }
+
+    get convictions(): boolean {
+        return this.#convictions;
+    }
+
+    get namedParameters(): string[] {
+        return Object.entries(Applicant.columns).map((k, v) => {
+            return `${v} = :${k}`;
+        });
+    }
+
     #validateReferences(): boolean {
         let errors = 0;
         this.references.forEach(ref => {
@@ -148,6 +168,7 @@ export default class Applicant extends Person {
         });
         return errors === 0;
     }
+
 
     validate(): boolean {
         const validations = [

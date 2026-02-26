@@ -1,27 +1,23 @@
 import connection from "./connection.js";
 import User from "../model/User.js";
-import type {RowDataPacket} from "mysql2/promise";
 
 
 class UserDao {
 
     async getById(userId: number) {
-        const stmt = [
-            "SELECT user_id, user_name, email, admin FROM users",
-            "WHERE user_id = ? AND active = 1",
-        ].join(" ");
-        const results = await connection.execute(stmt, [userId]);
+        const {byId} = User.queries;
+        const results = await connection.execute(byId, [userId]);
         const row = results?.[0];
         return row !== undefined
-            ? this.#transform(row)
+            ? User.transform(row)
             : undefined;
     }
 
     async getActiveUsers() {
-        const stmt = "SELECT user_id, user_name, email, admin FROM users WHERE active = 1";
-        const results = await connection.execute(stmt, []);
-        return results?.map((row:RowDataPacket) => {
-            return this.#transform(row);
+        const {all} = User.queries;
+        const results = await connection.execute(all, []);
+        return results?.map((row:{[k:string]:any}) => {
+            return User.transform(row);
         }) ?? []
     }
 
@@ -29,14 +25,6 @@ class UserDao {
 
     }
 
-    #transform(row:RowDataPacket): User {
-        return new User(
-            row["user_id"],
-            row["user_name"],
-            row["email"],
-            row["admin"]
-        )
-    }
 }
 
 export default new UserDao();

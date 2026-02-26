@@ -41,13 +41,22 @@ VALUES
     ("Completed")
 ;
 
+INSERT INTO licenses
+(value)
+VALUES
+    ("RN"),
+    ("CNA"),
+    ("CMT")
+;
 
 INSERT INTO positions
 (title, abbrev, status_id)
 VALUES
     ("Director of Nursing", "DON",2),
-    ("Part-time Registered Nurse", "PRN",1),
-    ("Certified Nursing Assistant", "CNA", 1)
+    ("Registered Nurse", "PRN",1),
+    ("Certified Nursing Assistant", "CNA", 1),
+    ("Coordinator", null, 1),
+    ("Office Manager", "HR", 1)
 ;
 
 

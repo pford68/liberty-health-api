@@ -1,11 +1,14 @@
-import Applicant, {Position, Status} from "../model/Applicatant.js";
+import Applicant from "../model/Applicatant.js";
 import connection from "./connection.js";
+import Position from "../model/Position.js";
+import Status from "../model/Status.js";
+import QueryBuilder from "./QueryBuilder.js";
 
 class ApplicantDao {
 
     async getByEmail(email:string) {
         const stmt = [
-            "SELECT a.applicant_id, a.first_name, a.last_name, a.email, a.phone,",
+            "SELECT a.*",
             "p.position_id, p.title as position, s.status_id, s.value as status",
             "FROM applicants a",
             "LEFT JOIN positions p",
@@ -25,6 +28,9 @@ class ApplicantDao {
                 new Position(result["position_id"], result["position"]),
                 new Status(result["status_id"], result["status"]),
                 result["phone"],
+                result["eligible_to_work"],
+                result["license_number"],
+                result["has_convictions"]
             )
             : undefined;
     }
@@ -42,6 +48,7 @@ class ApplicantDao {
             position: applicant.position.id,
             status: applicant.status.id,
         };
+
         const {id} = await connection.save(stmt, params) ?? {};
         return id ?? 0;
     }

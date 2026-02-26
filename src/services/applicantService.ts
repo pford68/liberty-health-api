@@ -1,7 +1,7 @@
 import type {Request, Response, NextFunction} from "express";
 import applicantDao from "../dao/ApplicantDao.js";
 import {isEmail} from "../util/validations.js";
-import Applicant, {Position} from "../model/Applicatant.js";
+import Applicant from "../model/Applicatant.js";
 
 
 export const save = async (req: Request, res: Response, next: NextFunction) => {
@@ -34,7 +34,7 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
 };
 
 export const cancel = async (req: Request, res: Response, next: NextFunction) => {
-
+    throw new Error("Not implemented");
 };
 
 export const getApplication = async (req: Request, res: Response, next: NextFunction) => {

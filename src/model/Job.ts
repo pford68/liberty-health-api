@@ -1,60 +1,123 @@
 import {isString} from "../util/validations.js";
-import JobReference from "./JobReference.js";
-
-export interface Location {
-    city: string,
-    state: string,
-    country: string
-}
+import type {Location} from "./Location.js";
+import type {Entity} from "./Entity.js";
+import Applicant from "./Applicatant.js";
 
 export interface Company {
     name: string,
     address1: string,
-    address2: string,
+    address2?: string,
     phone: string
 }
 
+
 interface JobPayload {
-    id: number | null
+    id: number | null,
+    applicantId: number,
     title: string
     startDate: Date
     endDate?: Date
     reasonForLeaving: string
-    supervisor: JobReference
     company: Company
-    location: Location
+    location: Location,
+    description: string,
 }
 
-export default class Job {
-    #id: number | null
-    #title: string
-    #startDate?: Date
-    #endDate?: Date
-    #reasonForLeaving?: string
-    #supervisor?: JobReference
-    #company?: Company
-    #location?: Location
+export default class Job implements Entity {
+
+    #id: number | null;
+    #applicantId: number;
+    #title: string;
+    #startDate?: Date;
+    #endDate?: Date;
+    #reasonForLeaving?: string;
+    #company?: Company;
+    #location?: Location;
+    #address1?: string;
+    #address2?: string;
+    #phone?: string;
+    #description?: string;
+    static #table:string = "job_history";
+    static #alias:string = "jh";
+    static #columns:{[key:string]: string} = {
+        id: "job_id",
+        applicant_fk: "applicant_id",
+        title: "title",
+        company: "company",
+        startDate: "start_date",
+        endDate: "end_date",
+        reasonForLeaving: "reason_ended",
+        phone: "phone",
+        address1: "address1",
+        address2: "address2",
+        city: "city",
+        state: "state",
+        country: "country",
+        description: "description",
+    };
 
     static create(data: JobPayload): Job {
-        const job = new Job(data.id, data.title);
+        const job = new Job(data.id, data.title, data.applicantId);
         job.company = data.company;
         job.startDate = data.startDate;
         if (data.endDate != undefined) {
             job.endDate = data.endDate;
         }
         job.reasonForLeaving = data.reasonForLeaving;
-        job.supervisor = data.supervisor;
         job.location = data.location;
         return job;
     }
 
-    constructor(id:number | null, title: string) {
+
+    static get table(): string {
+        return this.#table;
+    }
+
+    static get alias(): string {
+        return this.#alias;
+    }
+
+    static get columns(): { [key: string]: string } {
+        return this.#columns;
+    }
+
+    static get namedPlaceholders(): string[] {
+        return Object.entries(Job.columns).map((k, v) => {
+            return `${v} = :${k}`;
+        });
+    }
+
+    static transform(row:{[p:string]: any}): Job {
+        const job = new Job(row.id, row.title, row["applicant_id"]);
+        job.company = {
+            name: row.company,
+            phone: row.phone,
+            address1: row.address1,
+            address2: row.address2,
+        };
+        job.startDate = row["start_date"];
+        job.endDate = row["end_date"];
+        job.reasonForLeaving = row["reason_ended"]
+        job.location = {
+            city: row.city,
+            state: row.state,
+            country: row.country
+        };
+        return job;
+    }
+
+    constructor(id:number | null, title: string, applicantId: number) {
         this.#id = id;
         this.#title = title;
+        this.#applicantId = applicantId;
     }
 
     get id(): number | null {
         return this.#id;
+    }
+
+    get applicantId(): number {
+        return this.#applicantId;
     }
 
     get startDate(): Date | undefined {
@@ -79,14 +142,6 @@ export default class Job {
 
     set reasonForLeaving(value: string) {
         this.#reasonForLeaving = value;
-    }
-
-    get supervisor(): JobReference | undefined {
-        return this.#supervisor;
-    }
-
-    set supervisor(value: JobReference) {
-        this.#supervisor = value;
     }
 
     get company(): Company | undefined {
@@ -114,6 +169,38 @@ export default class Job {
         this.#title = value;
     }
 
+    get address1(): string | undefined {
+        return this.#address1;
+    }
+
+    set address1(value: string) {
+        this.#address1 = value;
+    }
+
+    get address2(): string | undefined {
+        return this.#address2;
+    }
+
+    set address2(value: string) {
+        this.#address2 = value;
+    }
+
+    get phone(): string | undefined {
+        return this.#phone;
+    }
+
+    set phone(value: string) {
+        this.#phone = value;
+    }
+
+    get description(): string | undefined {
+        return this.#description;
+    }
+
+    set description(value: string) {
+        this.#description = value;
+    }
+
     validate(): boolean {
         const validations = [
             () => isString(this.title),
@@ -132,11 +219,12 @@ export default class Job {
 
     toJSON(): unknown {
         return {
+            id: this.id,
+            applicantId: this.#applicantId,
             title: this.title,
             startDate: this.startDate,
             endDate: this.endDate,
             reasonForLeaving: this.reasonForLeaving,
-            supervisor: this.supervisor,
             company: this.company,
             location: this.location,
         };
