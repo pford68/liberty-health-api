@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import cookieParser from "cookie-parser";
-import logger from "morgan";
 import cors from "cors";
 import helmet from "helmet";
 import errorHandler from "./routes/errorHandler.js";
@@ -20,7 +19,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.disable('x-powered-by');  // Hide the fact that we are using express.
 
-app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors())
