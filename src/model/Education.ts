@@ -22,7 +22,7 @@ export type EducationPayload = {
 
 
 export default class Education implements Entity {
-    #id: number;
+    #id: number | null;
     #applicantId: number;
     #schoolName: string;
     #degree: Degree;
@@ -119,7 +119,7 @@ export default class Education implements Entity {
     }
 
 
-    get id(): number {
+    get id(): number | null {
         return this.#id;
     }
 

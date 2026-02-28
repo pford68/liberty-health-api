@@ -1,5 +1,5 @@
 import Job from "../model/Job.js";
-import connection, {type SaveStatus} from "./connection.js";
+import connection from "./connection.js";
 import logger from "../logging/Logger.js";
 
 class JobDao {
@@ -22,7 +22,7 @@ class JobDao {
         const {save} = Job.queries;
         const {id} = await connection.save(save, job.values) ?? {};
         if (id === undefined) throw new Error("Save attempt failed");
-        return id ?? 0;
+        return id;
     }
 
     async saveAll(jobs: Job[]) {
@@ -32,7 +32,7 @@ class JobDao {
         const {saveAll} = Job.queries;
         const result = await connection.saveAll(saveAll, [values]);
         if (result?.id === undefined) throw new Error("Save attempt failed");
-        return result ?? 0;
+        return result;
     }
 
     async update(job: Job) {
@@ -43,7 +43,7 @@ class JobDao {
     }
 
     async cancel(id: number) {
-
+        throw new Error("Not implemented");
     }
 
 }

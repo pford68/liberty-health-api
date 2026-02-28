@@ -2,7 +2,6 @@ import {Router} from "express";
 import {
     cancel,
     getById,
-    save,
     update,
     getByUserId,
     saveAll,

@@ -23,7 +23,7 @@ class EducationDao {
         const {save} = Education.queries;
         const {id} = await connection.save(save, school.values) ?? {};
         if (id === undefined) throw new Error("Save attempt failed");
-        return id ?? 0;
+        return id;
     }
 
     async saveAll(schools: Education[]) {
@@ -33,7 +33,7 @@ class EducationDao {
         const {saveAll} = Education.queries;
         const result = await connection.saveAll(saveAll, [values]);
         if (result?.id === undefined) throw new Error("Save attempt failed");
-        return result ?? 0;
+        return result;
     }
 
     async update(school: Education) {

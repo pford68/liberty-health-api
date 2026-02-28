@@ -1,13 +1,13 @@
 import type {Request, Response, NextFunction} from "express";
-import JobReference, {type ReferencePayload} from "../model/JobReference.js";
-import referenceDao from "../dao/ReferenceDao.js";
+import License, {type LicensePayload} from "../model/License.js";
+import licenseDao from "../dao/LicenseDao.js";
 
 
 export const saveAll = async (req: Request, res: Response, next: NextFunction) => {
     const { body } = req;
     try {
-        const refs: JobReference[] = body.map((data: ReferencePayload) => JobReference.create(data));
-        const result = await referenceDao.saveAll(refs);
+        const licenses: License[] = body.map((data: LicensePayload) => License.create(data));
+        const result = await licenseDao.saveAll(licenses);
         res
             .status(201)
             .json(result);
@@ -21,8 +21,8 @@ export const saveAll = async (req: Request, res: Response, next: NextFunction) =
 export const update = async (req: Request, res: Response, next: NextFunction) => {
     const { body } = req;
     try {
-        const ref = JobReference.create(body);
-        const result = await referenceDao.update(ref);
+        const license = License.create(body);
+        const result = await licenseDao.update(license);
         if (!result) throw new Error("Update attempt failed.");
         res.status(204);
     } catch (e) {
@@ -45,11 +45,11 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
             .json({message: "Bad request: an applicant id is required."});
     } else {
         try {
-            const result = await referenceDao.getAll(parsedId);
+            const result = await licenseDao.getByUserId(parsedId);
             if (result === undefined) {
                 res
                     .status(404)
-                    .json({message: "References not found"});
+                    .json({message: "Licenses not found"});
             }
             res
                 .status(200)
