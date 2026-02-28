@@ -60,6 +60,17 @@ VALUES
 ;
 
 
+INSERT INTO degrees (value)
+VALUES
+    ("High School"),
+    ("Associate's"),
+    ("Bachelor's"),
+    ("Master's"),
+    ("Ph.D"),
+    ("M.D.")
+;
+
+
 INSERT INTO applicants
 (
     first_name,
@@ -67,7 +78,9 @@ INSERT INTO applicants
     position_id,
     status_id,
     email,
-    phone
+    phone,
+    eligible_to_work,
+    has_convictions
 )
 VALUES
     (
@@ -76,7 +89,9 @@ VALUES
         2,
         1,
          "ldoncic@gmail.com",
-        "469-444-9012"
+        "469-444-9012",
+        1,
+        0
     )
 ;
 

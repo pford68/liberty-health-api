@@ -15,5 +15,6 @@ export type NamedQueries = {
     byId: string,
     all: string,
     deleteOne: string,
+    save: string,
 }
 

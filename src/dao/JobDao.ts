@@ -1,54 +1,44 @@
 import Job from "../model/Job.js";
-import connection from "./connection.js";
+import connection, {type SaveStatus} from "./connection.js";
+import logger from "../logging/Logger.js";
 
 class JobDao {
     async getById(id: number) {
-        const stmt = "SELECT * FROM job_history WHERE job_id = ?";
-        const results = await connection.execute(stmt, [id]);
+        const {byId} = Job.queries;
+        const results = await connection.execute(byId, [id]);
         const row = results?.[0];
-        row != undefined ? Job.transform(row) : undefined;
+        return row != undefined ? Job.transform(row) : undefined;
     }
 
-    async getJobHistory(userId: number) {
-        const stmt = "SELECT * FROM job_history WHERE applicant_id = ?";
-        const results = await connection.execute(stmt, [userId]);
+    async getJobHistory(applicantId: number) {
+        const {byApplicantId} =Job.queries;
+        const results = await connection.execute(byApplicantId, [applicantId]);
         return results?.map((row) => {
             return Job.transform(row);
         }) ?? [];
     }
 
     async save(job: Job) {
-        const params = this.#getParams(job);
-        const cols = Object.values(Job.columns);
-        const values = Object.entries(params)
-            .map(([key, value]) => {
-                if (typeof value === "string") return `"${value}"`;
-                if (value == null) return "";
-                if (key === "supervisor") return `'${JSON.stringify(value)}'`;
-                return value;
-            });
-        const stmt = [
-            `INSERT INTO job_history (${cols.join(",")})`,
-            `VALUES(${values.join(",")})`,
-        ].join(" ");
-        const {id} = await connection.save(stmt, params) ?? {};
+        const {save} = Job.queries;
+        const {id} = await connection.save(save, job.values) ?? {};
         if (id === undefined) throw new Error("Save attempt failed");
         return id ?? 0;
     }
 
+    async saveAll(jobs: Job[]) {
+        const values = jobs.map((job: Job) => job.values);
+        logger.info(values);
+
+        const {saveAll} = Job.queries;
+        const result = await connection.saveAll(saveAll, [values]);
+        if (result?.id === undefined) throw new Error("Save attempt failed");
+        return result ?? 0;
+    }
+
     async update(job: Job) {
-        const params = {
-            id: job.id,
-            ...this.#getParams(job)
-        }
-        const placeholders = Job.namedPlaceholders;
-        const stmt = [
-            "UPDATE job_history",
-            `SET ${placeholders.join(",")}`,
-            "WHERE job_id = ?"
-        ].join(" ");
-        console.log(stmt)
-        const {affectedRows} = await connection.save(stmt, params) ?? {};
+        const {update} = Job.queries;
+        logger.info(update)
+        const {affectedRows} = await connection.save(update, job.entries) ?? {};
         return affectedRows !== undefined ? affectedRows > 0 : false;
     }
 
@@ -56,22 +46,6 @@ class JobDao {
 
     }
 
-    #getParams(job: Job) {
-        return {
-            applicantId: job.applicantId,
-            title: job.title,
-            company: job.company?.name,
-            startDate: job.startDate,
-            endDate: job.endDate,
-            reasonForLeaving: job.reasonForLeaving,
-            phone: job.company?.phone,
-            address1: job.company?.address1,
-            address2: job.company?.address2 ?? "",
-            city: job.location?.city,
-            state: job.location?.state,
-            country: job.location?.country,
-        };
-    }
 }
 
 export default new JobDao();

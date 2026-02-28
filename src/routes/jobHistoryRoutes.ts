@@ -4,14 +4,15 @@ import {
     getById,
     save,
     update,
-    getByUserId
+    getByUserId,
+    saveAll,
 } from "../services/jobService.js";
 
 const jobRouter = Router();
 
 jobRouter.get("/:jobId", getById);
 jobRouter.get("/user/:userId", getByUserId);
-jobRouter.post("/", save);
+jobRouter.post("/", saveAll);
 jobRouter.put("/:jobId", update);
 jobRouter.delete("/:jobId", cancel);
 

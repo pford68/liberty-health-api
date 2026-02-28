@@ -1,6 +1,6 @@
 import type {Request, Response, NextFunction} from "express";
 import jobDao from "../dao/JobDao.js";
-import Job from "../model/Job.js";
+import Job, {type JobPayload} from "../model/Job.js";
 
 
 export const save = async (req: Request, res: Response, next: NextFunction) => {
@@ -11,6 +11,21 @@ export const save = async (req: Request, res: Response, next: NextFunction) => {
         res
             .status(201)
             .json({id});
+    } catch (e) {
+        res
+            .status(500)
+            .json({message: (e as Error).message});
+    }
+};
+
+export const saveAll = async (req: Request, res: Response, next: NextFunction) => {
+    const { body } = req;
+    try {
+        const jobs: Job[] = body.map((data: JobPayload) => Job.create(data));
+        const result = await jobDao.saveAll(jobs);
+        res
+            .status(201)
+            .json(result);
     } catch (e) {
         res
             .status(500)
@@ -42,14 +57,14 @@ export const getByUserId = async (req: Request, res: Response, next: NextFunctio
     if (userId == undefined || isNaN(parsedId)) {
         res
             .status(400)
-            .json({message: "Bad request: a job id is required."});
+            .json({message: "Bad request: an applicant id is required."});
     } else {
         try {
             const result = await jobDao.getJobHistory(parsedId);
             if (result === undefined) {
                 res
                     .status(404)
-                    .json({message: "Job not found"});
+                    .json({message: "Job history not found"});
             }
             res
                 .status(200)

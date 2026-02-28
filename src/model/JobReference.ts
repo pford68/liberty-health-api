@@ -1,6 +1,10 @@
 import Person from "./Person.js";
 import {isEmail, isPhone, isString} from "../util/validations.js";
-import type {Entity} from "./Entity.js";
+import type {Entity, NamedQueries} from "./Entity.js";
+
+type ReferenceQueries = NamedQueries & {
+    byApplicantId: string,
+}
 
 interface ReferencePayload {
     firstName: string,
@@ -13,6 +17,7 @@ interface ReferencePayload {
 
 export default class JobReference extends Person implements Entity {
     #applicantId: number;
+
     static #table: string = "job_references";
     static #alias: string = "jr";
     static #columns = {
@@ -21,13 +26,29 @@ export default class JobReference extends Person implements Entity {
         firstName: "first_name",
         lastName: "last_name",
         email: "email",
-        phone: "phone"
+        phone: "phone",
+    }
+    static queries: ReferenceQueries = {
+        byId: "SELECT * FROM job_references WHERE ref_id = ?",
+        byApplicantId: "SELECT * FROM job_references WHERE applicant_id = ?",
+        all: "",
+        deleteOne: "DELETE FROM job_references WHERE ref_id = ?",
+        save: [
+            "INSERT INTO job_references",
+            "VALUES(:applicantId, :first_name, :last_name, :email, :phone)"
+        ].join(" ")
     }
 
-    /*
-    static create(data: ReferencePayload): JobReference {
 
-    }*/
+    static create(data: ReferencePayload): JobReference {
+        return new JobReference(
+            data.firstName,
+            data.lastName,
+            data.email,
+            data.phone,
+            data.applicantId
+        )
+    }
 
     constructor(
         firstName: string,
@@ -64,6 +85,7 @@ export default class JobReference extends Person implements Entity {
             lastName: this.lastName,
             email: this.email,
             phone: this.phone,
+            applicantId: this.applicantId
         }
     }
 
