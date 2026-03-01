@@ -2,103 +2,32 @@ import type {Request, Response, NextFunction} from "express";
 import jobDao from "../dao/JobDao.js";
 import Job, {type JobPayload} from "../model/Job.js";
 
+class JobService {
+    save = async (data: JobPayload) => {
+        const job = Job.create(data);
+        return await jobDao.save(job);
+    };
 
-export const save = async (req: Request, res: Response, next: NextFunction) => {
-    const { body } = req;
-    try {
-        const job = Job.create(body);
-        const id = await jobDao.save(job);
-        res
-            .status(201)
-            .json({id});
-    } catch (e) {
-        res
-            .status(500)
-            .json({message: (e as Error).message});
+    saveAll = async (data: JobPayload[]) => {
+        const jobs: Job[] = data.map((data: JobPayload) => Job.create(data));
+        return await jobDao.saveAll(jobs);
+
+    };
+
+    update = async (data: JobPayload) => {
+        const job = Job.create(data);
+        return await jobDao.update(job);
+    };
+
+
+   getByUserId = async (userId: number) => {
+       return await jobDao.getJobHistory(userId);
+    };
+
+
+    getById = async (jobId: number) => {
+        return await jobDao.getById(jobId);
     }
-};
+}
 
-export const saveAll = async (req: Request, res: Response, next: NextFunction) => {
-    const { body } = req;
-    try {
-        const jobs: Job[] = body.map((data: JobPayload) => Job.create(data));
-        const result = await jobDao.saveAll(jobs);
-        res
-            .status(201)
-            .json(result);
-    } catch (e) {
-        res
-            .status(500)
-            .json({message: (e as Error).message});
-    }
-};
-
-export const update = async (req: Request, res: Response, next: NextFunction) => {
-    const { body } = req;
-    try {
-        const job = Job.create(body);
-        const result = await jobDao.update(job);
-        if (!result) throw new Error("Update attempt failed.");
-        res.status(204);
-    } catch (e) {
-        res
-            .status(500)
-            .json({message: (e as Error).message});
-    }
-};
-
-export const cancel = async (req: Request, res: Response, next: NextFunction) => {
-    throw new Error("Not implemented");
-};
-
-export const getByUserId = async (req: Request, res: Response, next: NextFunction) => {
-    const {userId} = req.params;
-    const parsedId = Number(userId);
-    if (userId == undefined || isNaN(parsedId)) {
-        res
-            .status(400)
-            .json({message: "Bad request: an applicant id is required."});
-    } else {
-        try {
-            const result = await jobDao.getJobHistory(parsedId);
-            if (result === undefined) {
-                res
-                    .status(404)
-                    .json({message: "Job history not found"});
-            }
-            res
-                .status(200)
-                .json(result);
-        } catch (e) {
-            res
-                .status(500)
-                .json({message: (e as Error).message});
-        }
-    }
-};
-
-export const getById = async (req: Request, res: Response, next: NextFunction) => {
-    const {id} = req.params;
-    const parsedId = Number(id);
-    if (id == undefined || isNaN(parsedId)) {
-        res
-            .status(400)
-            .json({message: "Bad request: a job id is required."});
-    } else {
-        try {
-            const result = await jobDao.getById(parsedId);
-            if (result === undefined) {
-                res
-                    .status(404)
-                    .json({message: "Job not found"});
-            }
-            res
-                .status(200)
-                .json(result);
-        } catch (e) {
-            res
-                .status(500)
-                .json({message: (e as Error).message});
-        }
-    }
-};
+export default new JobService();

@@ -9,7 +9,7 @@ import type {NamedQueries} from "./Entity.js";
 import Column from "../decorators/Column.js";
 import  Education from "./Education.js";
 
-interface ApplicantPayload {
+export interface ApplicantPayload {
     id: number,
     firstName: string,
     lastName: string,

@@ -1,16 +1,13 @@
 import {Router} from "express";
-import {
-    save,
-    cancel,
-    getApplication,
-    update
-} from "../services/applicantService.js";
+import {getApplication, save, update} from "../requestHandlers/applicantRequests.js";
 
+//============================ Private
 const applicantRouter = Router();
 
+//============================ Routing
 applicantRouter.get("/search", getApplication);
 applicantRouter.post("/", save);
 applicantRouter.put("/:applicantId", update);
-applicantRouter.delete("/:applicantId", cancel);
 
+//============================ Exports
 export default applicantRouter;
