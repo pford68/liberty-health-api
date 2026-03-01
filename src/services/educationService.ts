@@ -8,10 +8,10 @@ export const saveAll =  async (req: Request, res:Response, next:NextFunction) =>
     const { body } = req;
     try {
         const schools: Education[] = body.map((data: EducationPayload) => Education.create(data));
-        const result = await educationDao.saveAll(schools);
+        const education = await educationDao.saveAll(schools);
         res
             .status(201)
-            .json(result);
+            .json({education});
     } catch (e) {
         res
             .status(500)
@@ -28,15 +28,16 @@ export const getByApplicantId = async (req: Request, res:Response, next:NextFunc
             .json({message: "Bad request: an applicant id is required."});
     } else {
         try {
-            const result = await educationDao.getByApplicantId(parsedId);
-            if (result === undefined) {
+            const education = await educationDao.getByApplicantId(parsedId);
+            if (education === undefined) {
                 res
                     .status(404)
                     .json({message: "Education history not found"});
+            } else {
+                res
+                    .status(200)
+                    .json({education});
             }
-            res
-                .status(200)
-                .json(result);
         } catch (e) {
             res
                 .status(500)

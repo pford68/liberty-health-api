@@ -45,15 +45,16 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
             .json({message: "Bad request: an applicant id is required."});
     } else {
         try {
-            const result = await licenseDao.getByUserId(parsedId);
-            if (result === undefined) {
+            const licenses = await licenseDao.getByUserId(parsedId);
+            if (licenses === undefined) {
                 res
                     .status(404)
                     .json({message: "Licenses not found"});
+            } else {
+                res
+                    .status(200)
+                    .json({licenses});
             }
-            res
-                .status(200)
-                .json(result);
         } catch (e) {
             res
                 .status(500)

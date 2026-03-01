@@ -60,15 +60,16 @@ export const getByUserId = async (req: Request, res: Response, next: NextFunctio
             .json({message: "Bad request: an applicant id is required."});
     } else {
         try {
-            const result = await jobDao.getJobHistory(parsedId);
-            if (result === undefined) {
+            const jobHistory = await jobDao.getJobHistory(parsedId);
+            if (jobHistory === undefined) {
                 res
                     .status(404)
                     .json({message: "Job history not found"});
+            } else {
+                res
+                    .status(200)
+                    .json({jobHistory});
             }
-            res
-                .status(200)
-                .json(result);
         } catch (e) {
             res
                 .status(500)
@@ -86,15 +87,15 @@ export const getById = async (req: Request, res: Response, next: NextFunction) =
             .json({message: "Bad request: a job id is required."});
     } else {
         try {
-            const result = await jobDao.getById(parsedId);
-            if (result === undefined) {
+            const job = await jobDao.getById(parsedId);
+            if (job === undefined) {
                 res
                     .status(404)
                     .json({message: "Job not found"});
             }
             res
                 .status(200)
-                .json(result);
+                .json({job});
         } catch (e) {
             res
                 .status(500)

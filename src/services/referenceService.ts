@@ -45,15 +45,16 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
             .json({message: "Bad request: an applicant id is required."});
     } else {
         try {
-            const result = await referenceDao.getAll(parsedId);
-            if (result === undefined) {
+            const references = await referenceDao.getAll(parsedId);
+            if (references === undefined) {
                 res
                     .status(404)
                     .json({message: "References not found"});
+            } else {
+                res
+                    .status(200)
+                    .json({references});
             }
-            res
-                .status(200)
-                .json(result);
         } catch (e) {
             res
                 .status(500)
