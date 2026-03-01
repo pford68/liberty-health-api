@@ -1,6 +1,4 @@
-import type {Request, Response, NextFunction} from 'express';
 import userDao from "../dao/UserDao.js";
-import type User from "../model/User.js";
 
 class UserService {
     getUserById = async (userId: number) => {
