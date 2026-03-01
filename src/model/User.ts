@@ -33,6 +33,7 @@ export default class User implements Entity {
             "WHERE user_id = ? AND active = 1",
         all: "SELECT user_id, user_name, email, admin FROM users WHERE active = 1",
         deleteOne: "DELETE FROM users WHERE user_id = ?",
+        save: ""
     }
 
 
@@ -109,5 +110,9 @@ export default class User implements Entity {
             "authenticated": this.authenticated,
             "admin": this.admin,
         }
+    }
+
+    toString(): string {
+        return JSON.stringify(this.toJSON());
     }
 }

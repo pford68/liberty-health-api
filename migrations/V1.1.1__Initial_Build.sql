@@ -72,6 +72,7 @@ CREATE TABLE job_history (
 ;
 
 CREATE TABLE applicant_licenses (
+    license_number VARCHAR(32) NOT NULL,
     applicant_id INT NOT NULL,
     license_type_id INT NOT NULL,
     date_expires DATE,

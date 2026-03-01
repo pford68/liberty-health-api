@@ -8,6 +8,7 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
+    "moduleResolution": "nodenext",
     "allowSyntheticDefaultImports": true, /* Further supports default imports (used with esModuleInterop) */
 
     // For nodejs:
@@ -40,8 +41,11 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-
+    "target": "es2023"
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*.ts", "**/__tests__/**/*.ts"],
+  "exclude": ["node_modules", "./dist"],
+
+  "experimentalDecorators": true,
+  "emitDecoratorMetadata": true
 }

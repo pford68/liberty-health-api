@@ -1,6 +1,6 @@
 import {isString} from "../util/validations.js";
 import type {Location} from "./Location.js";
-import type {Entity} from "./Entity.js";
+import type {Entity, NamedQueries} from "./Entity.js";
 import Applicant from "./Applicatant.js";
 
 export interface Company {
@@ -10,8 +10,14 @@ export interface Company {
     phone: string
 }
 
+type JobQueries = NamedQueries & {
+    byApplicantId: string,
+    saveAll: string,
+    update: string,
+}
 
-interface JobPayload {
+
+export interface JobPayload {
     id: number | null,
     applicantId: number,
     title: string
@@ -55,18 +61,16 @@ export default class Job implements Entity {
         country: "country",
         description: "description",
     };
+    static #queries:JobQueries = {
+        byId:"",
+        byApplicantId: "",
+        save: "",
+        deleteOne: "",
+        all: "",
+        saveAll: "",
+        update: ""
+    };
 
-    static create(data: JobPayload): Job {
-        const job = new Job(data.id, data.title, data.applicantId);
-        job.company = data.company;
-        job.startDate = data.startDate;
-        if (data.endDate != undefined) {
-            job.endDate = data.endDate;
-        }
-        job.reasonForLeaving = data.reasonForLeaving;
-        job.location = data.location;
-        return job;
-    }
 
 
     static get table(): string {
@@ -86,6 +90,41 @@ export default class Job implements Entity {
             return `${v} = :${k}`;
         });
     }
+
+
+    static get queries(): JobQueries {
+        return this.#queries;
+    }
+
+
+    static {
+        const newRecord = Object.values(Job.#columns);
+        const id = newRecord.shift();
+        const table = Job.#table;
+        const placeholders = Job.namedPlaceholders;
+        Job.#queries = {
+            ...Job.#queries,
+            byId:`SELECT * FROM ${table} WHERE ${id} = ?`,
+            byApplicantId:`SELECT * FROM ${table} WHERE applicant_id = ?`,
+            saveAll: `INSERT INTO ${table} (${newRecord}) VALUES ?`,
+            deleteOne: `DELETE FROM ${table} WHERE ${id} = ?`,
+            update: `UPDATE ${table} SET ${placeholders.join(",")} WHERE ${id} = ?`
+        };
+    }
+
+    static create(data: JobPayload): Job {
+        const job = new Job(data.id, data.title, data.applicantId);
+        job.company = data.company;
+        job.startDate = data.startDate;
+        if (data.endDate != undefined) {
+            job.endDate = data.endDate;
+        }
+        job.reasonForLeaving = data.reasonForLeaving;
+        job.location = data.location;
+        job.description = data.description;
+        return job;
+    }
+
 
     static transform(row:{[p:string]: any}): Job {
         const job = new Job(row.id, row.title, row["applicant_id"]);
@@ -217,7 +256,36 @@ export default class Job implements Entity {
         return true;
     }
 
-    toJSON(): unknown {
+    get entries():{[key:string]:unknown} {
+        const copy = {...this.toJSON()};
+        if (copy.id == null) {
+            delete copy.id;
+        }
+        return copy;
+    }
+
+    get values():unknown[] {
+        const result = [
+            this.id,
+            this.applicantId,
+            this.title,
+            this.company?.name,
+            this.startDate,
+            this.endDate,
+            this.reasonForLeaving,
+            this.company?.phone,
+            this.company?.address1,
+            this.company?.address2 ?? "",
+            this.location?.city,
+            this.location?.state,
+            this.location?.country,
+            this.description,
+        ];
+        if (this.id === undefined) result.shift();
+        return result;
+    }
+
+    toJSON(): {[key:string]:unknown} {
         return {
             id: this.id,
             applicantId: this.#applicantId,
@@ -227,6 +295,7 @@ export default class Job implements Entity {
             reasonForLeaving: this.reasonForLeaving,
             company: this.company,
             location: this.location,
+            description: this.description,
         };
     }
 }

@@ -5,6 +5,9 @@ import JobReference from "./JobReference.js";
 import Position from "./Position.js";
 import Status from "./Status.js";
 import License from "./License.js";
+import type {NamedQueries} from "./Entity.js";
+import Column from "../decorators/Column.js";
+import  Education from "./Education.js";
 
 interface ApplicantPayload {
     id: number,
@@ -19,12 +22,17 @@ interface ApplicantPayload {
     convictions: boolean
 }
 
+type ApplicantQueries = NamedQueries & {
+    byEmail: string,
+}
+
 
 export default class Applicant extends Person {
     #id: number | undefined;
     #references: JobReference[];
     #position: Partial<Position>;
     #jobHistory: Job[];
+    #education: Education[];
     #status: Partial<Status>;
     #eligibleToWork: boolean;
     #licences: Partial<License>[];
@@ -42,7 +50,26 @@ export default class Applicant extends Person {
         conviction: "has_convictions"
     };
     static #alias: string = "a";
-
+    static #queries: ApplicantQueries = {
+        byEmail: [
+                "SELECT a.*,",
+                "p.position_id, p.title as position, s.status_id, s.value as status",
+                "FROM applicants a",
+                "LEFT JOIN positions p",
+                "USING(position_id)",
+                "LEFT JOIN status s",
+                "ON a.status_id = s.status_id",
+                "WHERE a.email = ?",
+            ].join(" "),
+        save: [
+                "INSERT INTO applicants",
+                "(first_name, last_name, position_id, status_id, email, phone, eligible_to_work, has_convictions)",
+                "VALUES (:firstName, :lastName, :position, :status, :email, :phone, :eligibleToWork, :convictions)",
+            ].join(" "),
+        deleteOne: "",
+        byId: "",
+        all: "",
+    }
 
     static create(data: ApplicantPayload): Applicant {
         if (data.position.id === undefined) {
@@ -82,12 +109,17 @@ export default class Applicant extends Person {
         this.#references = [];
         this.#position = position;
         this.#jobHistory = [];
+        this.#education = [];
         this.#status = status;
         this.#eligibleToWork = eligibleToWork;
         this.#licences = licenses ?? [];
         this.#convictions = convictions ?? this.#convictions;
     }
 
+
+    static get queries(): ApplicantQueries {
+        return this.#queries;
+    }
 
     static get table(): string {
         return Applicant.#table;
@@ -143,6 +175,14 @@ export default class Applicant extends Person {
         this.#jobHistory = value;
     }
 
+    get education(): Education[] {
+        return this.#education;
+    }
+
+    set education(value: Education[]) {
+        this.#education = value;
+    }
+
     get eligibleToWork(): boolean {
         return this.#eligibleToWork;
     }
@@ -193,7 +233,15 @@ export default class Applicant extends Person {
             email: this.email,
             position: this.position,
             references: this.references,
-            employmentHistory: this.jobHistory,
+            jobHistory: this.jobHistory,
+            education: this.education,
+            licenses: this.licences,
+            eligibleToWork: this.eligibleToWork,
+            convictions: this.convictions
         };
+    }
+
+    toString(): string {
+        return JSON.stringify(this.toJSON());
     }
 }

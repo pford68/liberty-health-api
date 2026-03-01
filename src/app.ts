@@ -8,6 +8,8 @@ import userRouter from "./routes/userRoutes.js";
 import applicantRouter from "./routes/applicantRoutes.js";
 import referenceRouter from "./routes/referenceRoutes.js";
 import jobRouter from "./routes/jobHistoryRoutes.js";
+import educationRouter from "./routes/educationRoutes.js";
+import licenseRouter from "./routes/licenseRoutes.js";
 
 const app = express();
 
@@ -28,6 +30,8 @@ app.use("/api/users/", userRouter);
 app.use("/api/form/", applicantRouter);
 app.use("/api/form/references/", referenceRouter);
 app.use("/api/form/jobs/", jobRouter);
+app.use("/api/form/schools/", educationRouter);
+app.use("/api/form/licenses/", licenseRouter)
 app.use(errorHandler);
 
 export default app;

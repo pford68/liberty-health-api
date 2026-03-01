@@ -8,7 +8,7 @@ class ApplicantDao {
 
     async getByEmail(email:string) {
         const stmt = [
-            "SELECT a.*",
+            "SELECT a.*,",
             "p.position_id, p.title as position, s.status_id, s.value as status",
             "FROM applicants a",
             "LEFT JOIN positions p",
@@ -28,18 +28,15 @@ class ApplicantDao {
                 new Position(result["position_id"], result["position"]),
                 new Status(result["status_id"], result["status"]),
                 result["phone"],
-                result["eligible_to_work"],
-                result["license_number"],
-                result["has_convictions"]
+                result["eligible_to_work"] == 1,
+                [], // TODO
+                result["has_convictions"] == 1
             )
             : undefined;
     }
 
     async save(applicant: Applicant) {
-        const stmt = [
-            "INSERT INTO applicants (first_name, last_name, position_id, status_id, email, phone)",
-            "values (:firstName, :lastName, :position, :status, :email, :phone)",
-        ].join(" ");
+        const stmt = Applicant.queries.save;
         const params = {
             firstName: applicant.firstName,
             lastName: applicant.lastName,
@@ -47,6 +44,8 @@ class ApplicantDao {
             phone: applicant.phone,
             position: applicant.position.id,
             status: applicant.status.id,
+            eligibleToWork: applicant.eligibleToWork,
+            convictions: applicant.convictions
         };
 
         const {id} = await connection.save(stmt, params) ?? {};
