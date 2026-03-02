@@ -83,25 +83,26 @@ export default class QueryBuilder {
         return this;
     }
 
-    insert<T>(cls: EntityType<T>, cols:string[], values:unknown[]): QueryBuilder {
+    insert<T>(cls: EntityType<T>, cols:string[]): QueryBuilder {
         const stmt = [`INSERT INTO ${cls.table}`];
         if (cols.length > 0) {
             stmt.push(`(${cols.join(",")})`)
         }
-        stmt.push(`VALUES(${values.join(",")})`)
+        stmt.push(`VALUES ?`);
         this.#query.push(stmt.join(" "));
         return this;
     }
 
-    update<T>(cls: EntityType<T>, cols:string[], criteria:string): QueryBuilder {
-        const stmt = [`SET ${cls.table}`];
+    update<T>(cls: EntityType<T>, cols:string[]): QueryBuilder {
+        const stmt = [`UPDATE ${cls.table}`];
+        stmt.push("SET");
         if (cols.length > 0) {
-            const substr = Object.entries(cls.columns).map(([k, v]) => {
-                return `${v} = :${k}`;
-            });
+            const substr = Object.entries(cls.columns)
+                .map(([k, v]) => {
+                    return `${v} = :${k}`;
+                });
             stmt.push(...substr);
         }
-        stmt.push(`WHERE ${criteria}`);
         this.#query.push(stmt.join(" "));
         return this;
     }

@@ -1,6 +1,7 @@
 import Job from "../model/Job.js";
 import connection from "./connection.js";
 import logger from "../logging/Logger.js";
+import QueryBuilder from "./QueryBuilder.js";
 
 class JobDao {
     async getById(id: number) {
@@ -21,7 +22,9 @@ class JobDao {
     async save(job: Job) {
         const {save} = Job.queries;
         const {id} = await connection.save(save, job.values) ?? {};
-        if (id === undefined) throw new Error("Save attempt failed");
+        if (id === undefined) {
+            throw new Error("Save attempt failed");
+        }
         return id;
     }
 
@@ -31,21 +34,21 @@ class JobDao {
 
         const {saveAll} = Job.queries;
         const result = await connection.saveAll(saveAll, [values]);
-        if (result?.id === undefined) throw new Error("Save attempt failed");
+        if (result?.id === undefined) {
+            throw new Error("Save attempt failed");
+        }
         return result;
     }
 
     async update(job: Job) {
-        const {update} = Job.queries;
-        logger.info(update)
-        const {affectedRows} = await connection.save(update, job.entries) ?? {};
+        const {data} = job;
+        logger.info(data)
+        const stmt = new QueryBuilder()
+            .update(Job, Object.keys(data))
+            .build();
+        const {affectedRows} = await connection.save(stmt, job.entries) ?? {};
         return affectedRows !== undefined ? affectedRows > 0 : false;
     }
-
-    async cancel(id: number) {
-        throw new Error("Not implemented");
-    }
-
 }
 
 export default new JobDao();

@@ -1,4 +1,3 @@
-import Person from "./Person.js";
 import {isEmail, isPhone, isString} from "../util/validations.js";
 import type {Entity, NamedQueries} from "./Entity.js";
 
@@ -8,19 +7,18 @@ type ReferenceQueries = NamedQueries & {
     update: string,
 }
 
-export interface ReferencePayload {
-    id: number | null,
-    firstName: string,
-    lastName: string,
-    email: string,
-    phone: string,
+export interface ReferenceData {
+    id?: number | undefined,
     applicantId: number,
+    firstName?: string,
+    lastName?: string,
+    email?: string,
+    phone?: string,
     supervisor?: boolean
 }
 
-export default class JobReference extends Person implements Entity {
-    #id: number | null;
-    #applicantId: number;
+export default class JobReference implements Entity {
+    #data: ReferenceData;
 
     static #table: string = "job_references";
     static #alias: string = "jr";
@@ -74,61 +72,58 @@ export default class JobReference extends Person implements Entity {
         return this.#queries;
     }
 
-    static create(data: ReferencePayload): JobReference {
-        return new JobReference(
-            data.id,
-            data.firstName,
-            data.lastName,
-            data.email,
-            data.phone,
-            data.applicantId
-        )
-    }
-
     static transform(row:{[key:string]:any}):JobReference {
-        return new JobReference(
-            row["ref_id"],
-            row["first_name"],
-            row["last_name"],
-            row["email"],
-            row["phone"],
-            row["applicant_id"],
-        )
+        return new JobReference({
+            id: row["ref_id"],
+            firstName: row["first_name"],
+            lastName: row["last_name"],
+            email: row["email"],
+            phone: row["phone"],
+            applicantId: row["applicant_id"],
+        })
     }
 
     static {
         const newRecord = Object.values(JobReference.#columns);
         const id = newRecord.shift();
         const table = JobReference.#table;
-        const placeholders = JobReference.namedPlaceholders;
 
         JobReference.#queries = {
             ...JobReference.queries,
-            update: `UPDATE ${table} SET ${placeholders.join(",")} WHERE ${id} = ?`,
             saveAll: `INSERT INTO ${table} (${newRecord}) VALUES ?`,
         }
     }
 
-    constructor(
-        id: number | null,
-        firstName: string,
-        lastName: string,
-        email: string,
-        phone: string,
-        applicantId: number,
-    ) {
-        super(firstName, lastName, email, phone);
-        this.#id = id;
-        this.#applicantId = applicantId;
+    constructor(data: ReferenceData) {
+        this.#data = data;
     }
 
-
-    get id(): number | null {
-        return this.#id;
+    get data(): ReferenceData {
+        return structuredClone(this.#data);
     }
 
-    get applicantId(): number {
-        return this.#applicantId;
+    get id(): number | undefined {
+        return this.#data.id;
+    }
+
+    get applicantId(): number | undefined {
+        return this.#data.applicantId;
+    }
+
+    get firstName(): string {
+        return this.#data.firstName ?? "";
+    }
+
+    get lastName(): string {
+        return this.#data.lastName ?? "";
+    }
+
+    get email(): string {
+        return this.#data.email ?? "";
+    }
+
+    get phone(): string {
+        return this.#data.phone ?? "";
     }
 
     validate(): boolean {
@@ -144,15 +139,8 @@ export default class JobReference extends Person implements Entity {
         return true;
     }
 
-    toJSON(): {[key:string]:unknown} {
-        return {
-            id: this.id,
-            applicantId: this.applicantId,
-            firstName: this.firstName,
-            lastName: this.lastName,
-            email: this.email,
-            phone: this.phone,
-        }
+    toJSON(): ReferenceData {
+        return this.data;
     }
 
     get entries():{[key:string]:unknown} {

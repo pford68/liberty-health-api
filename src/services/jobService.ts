@@ -1,21 +1,21 @@
-import type {Request, Response, NextFunction} from "express";
 import jobDao from "../dao/JobDao.js";
-import Job, {type JobPayload} from "../model/Job.js";
+import Job, {type JobData} from "../model/Job.js";
+
 
 class JobService {
-    save = async (data: JobPayload) => {
-        const job = Job.create(data);
+    save = async (data: JobData) => {
+        const job = new Job(data);
         return await jobDao.save(job);
     };
 
-    saveAll = async (data: JobPayload[]) => {
-        const jobs: Job[] = data.map((data: JobPayload) => Job.create(data));
+    saveAll = async (data: JobData[]) => {
+        const jobs: Job[] = data.map((data: JobData) => new Job(data));
         return await jobDao.saveAll(jobs);
 
     };
 
-    update = async (data: JobPayload) => {
-        const job = Job.create(data);
+    update = async (data: JobData) => {
+        const job = new Job(data);
         return await jobDao.update(job);
     };
 

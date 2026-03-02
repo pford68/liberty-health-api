@@ -1,12 +1,9 @@
 import JobReference from "../model/JobReference.js";
 import connection from "./connection.js";
-import Education from "../model/Education.js";
 import logger from "../logging/Logger.js";
+import QueryBuilder from "./QueryBuilder.js";
 
 class ReferenceDao {
-    getById(id: number) {
-
-    }
 
     async getAll(applicantId: number) {
         const {byApplicantId} = JobReference.queries;
@@ -18,7 +15,7 @@ class ReferenceDao {
 
     async saveAll(refs: JobReference[]) {
         const values = refs.map((ref: JobReference) => ref.values);
-        console.dir(values);
+        logger.debug(values);
 
         const {saveAll} = JobReference.queries;
         const result = await connection.saveAll(saveAll, [values]);
@@ -27,14 +24,13 @@ class ReferenceDao {
     }
 
     async update(ref: JobReference) {
-        const {update} = JobReference.queries;
-        logger.info(update)
-        const {affectedRows} = await connection.save(update, ref.entries) ?? {};
+        const {data} = ref;
+        const stmt = new QueryBuilder()
+            .update(JobReference, Object.keys(data))
+            .build();
+        logger.debug(stmt)
+        const {affectedRows} = await connection.save(stmt, ref.entries) ?? {};
         return affectedRows !== undefined ? affectedRows > 0 : false;
-    }
-
-    async cancel(id: number) {
-
     }
 }
 

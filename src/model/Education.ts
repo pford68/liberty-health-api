@@ -12,7 +12,7 @@ type EducationQueries = NamedQueries & {
     update: string,
 }
 
-export type EducationPayload = {
+export type EducationData = {
     id: number,
     applicantId: number,
     schoolName: string,
@@ -22,11 +22,7 @@ export type EducationPayload = {
 
 
 export default class Education implements Entity {
-    #id: number | null;
-    #applicantId: number;
-    #schoolName: string;
-    #degree: Degree;
-    #location: Location;
+    #data: Partial<EducationData>;
 
     static #table:string = "education"
     static #columns:{[key:string]: string} = {
@@ -71,72 +67,47 @@ export default class Education implements Entity {
         const newRecord = Object.values(Education.#columns);
         const id = newRecord.shift();
         const table = Education.#table;
-        const placeholders = Education.namedPlaceholders;
         Education.#queries = {
             ...Education.#queries,
             byId:`SELECT * FROM ${table} WHERE ${id} = ?`,
             byApplicantId:`SELECT * FROM ${table} WHERE applicant_id = ?`,
             saveAll: `INSERT INTO ${table} (${newRecord}) VALUES ?`,
             deleteOne: `DELETE FROM ${table} WHERE ${id} = ?`,
-            update: `UPDATE ${table} SET ${placeholders.join(",")} WHERE ${id} = ?`
         };
     }
 
     static transform(row:{[key:string]:any}):Education {
-        return new Education(
-            row["school_id"],
-            row["applicant_id"],
-            row["school_name"],
-            {id: row.degree_id, name:row.value},
-            {city: row.city, state: row.state, country: row.country}
-        )
+        return new Education({
+            id: row["school_id"],
+            applicantId: row["applicant_id"],
+            schoolName: row["school_name"],
+            degree: {id: row.degree_id, name:row.value},
+            location: {city: row.city, state: row.state, country: row.country}
+        })
     }
 
-    static create(data: EducationPayload):Education {
-        return new Education(
-            data.id,
-            data.applicantId,
-            data.schoolName,
-            data.degree,
-            data.location
-        )
+    constructor(data: Partial<EducationData>) {
+        this.#data = data;
     }
 
-
-
-    constructor(
-        id: number,
-        applicantId: number,
-        schoolName: string,
-        degree: Degree,
-        location: Location
-    ) {
-        this.#id = id;
-        this.#applicantId = applicantId;
-        this.#schoolName = schoolName;
-        this.#degree = degree;
-        this.#location = location;
+    get id(): number | undefined {
+        return this.#data.id;
     }
 
-
-    get id(): number | null {
-        return this.#id;
-    }
-
-    get applicantId(): number {
-        return this.#applicantId;
+    get applicantId(): number | undefined {
+        return this.#data.applicantId;
     }
 
     get schoolName(): string {
-        return this.#schoolName;
+        return this.#data.schoolName ?? "";
     }
 
-    get degree(): Degree {
-        return this.#degree;
+    get degree(): Degree | undefined {
+        return this.#data.degree;
     }
 
-    get location(): Location {
-        return this.#location;
+    get location(): Location | undefined {
+        return this.#data.location;
     }
 
     get entries():{[key:string]:unknown} {
@@ -161,17 +132,16 @@ export default class Education implements Entity {
         return values;
     }
 
+    get data(): Partial<EducationData> {
+        return structuredClone(this.#data);
+    }
+
+
     toJSON(): {[key:string]:unknown} {
-        return {
-            id: this.id,
-            applicantId: this.applicantId,
-            schoolName: this.schoolName,
-            degree: this.degree,
-            location: this.location
-        };
+        return this.data;
     }
 
     toString(): string {
-        return JSON.stringify(this.toJSON());
+        return JSON.stringify(this.data);
     }
 }
