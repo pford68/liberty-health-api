@@ -12,7 +12,10 @@
     "start": "node dist/server.js",
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
     "lint": "eslint 'src/**/*.ts'",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js jest --coverage -c jest.config.ts"
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js -c jest.config.ts",
+    "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js -c jest.config.ts --watch",
+    "test:ci": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js -c jest.config.ts --runInBand --no-cache",
+    "coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js -c jest.config.ts --coverage"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

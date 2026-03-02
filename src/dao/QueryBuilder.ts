@@ -93,15 +93,16 @@ export default class QueryBuilder {
         return this;
     }
 
-    update<T>(cls: EntityType<T>, cols:string[]): QueryBuilder {
+    update<T>(cls: EntityType<T>, ...cols:string[]): QueryBuilder {
         const stmt = [`UPDATE ${cls.table}`];
         stmt.push("SET");
         if (cols.length > 0) {
             const substr = Object.entries(cls.columns)
+                .filter(([k, v]) => cols.includes(k) )
                 .map(([k, v]) => {
                     return `${v} = :${k}`;
                 });
-            stmt.push(...substr);
+            stmt.push(substr.join(", "));
         }
         this.#query.push(stmt.join(" "));
         return this;

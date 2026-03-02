@@ -171,14 +171,6 @@ export default class Applicant {
         });
     }
 
-    #validateReferences(): boolean {
-        let errors = 0;
-        this.references.forEach(ref => {
-            if (!ref.validate?.()) ++errors;
-        });
-        return errors === 0;
-    }
-
 
     validate(): boolean {
         const validations = [
@@ -187,7 +179,7 @@ export default class Applicant {
             () => this.position != undefined,
             () => isEmail(this.email),
             () => this.references.length >= 2,
-            () => this.#validateReferences(),
+            //() => this.#validateReferences(),
         ];
         for (let validation of validations) {
             if (!validation()) return false;

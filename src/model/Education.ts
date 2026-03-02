@@ -136,7 +136,6 @@ export default class Education implements Entity {
         return structuredClone(this.#data);
     }
 
-
     toJSON(): {[key:string]:unknown} {
         return this.data;
     }

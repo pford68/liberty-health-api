@@ -126,22 +126,6 @@ export default class JobReference implements Entity {
         return this.#data.phone ?? "";
     }
 
-    validate(): boolean {
-        const validations = [
-            () => isString(this.firstName),
-            () => isString(this.lastName),
-            () => isEmail(this.email),
-            () => isPhone(this.phone),
-        ];
-        for (let validation of validations) {
-            if (!validation()) return false;
-        }
-        return true;
-    }
-
-    toJSON(): ReferenceData {
-        return this.data;
-    }
 
     get entries():{[key:string]:unknown} {
         const copy = {...this.toJSON()};
@@ -162,6 +146,27 @@ export default class JobReference implements Entity {
         ];
         if (values[0] === undefined) values.shift();
         return values;
+    }
+
+    validate(): boolean {
+        const validations = [
+            () => isString(this.firstName),
+            () => isString(this.lastName),
+            () => isEmail(this.email),
+            () => isPhone(this.phone),
+        ];
+        for (let validation of validations) {
+            if (!validation()) return false;
+        }
+        return true;
+    }
+
+    toJSON(): ReferenceData {
+        return this.data;
+    }
+
+    toString(): string {
+        return JSON.stringify(this.data);
     }
 
 }
