@@ -1,14 +1,14 @@
-import JobReference, {type ReferencePayload} from "../model/JobReference.js";
+import JobReference, {type ReferenceData} from "../model/JobReference.js";
 import referenceDao from "../dao/ReferenceDao.js";
 
 class ReferenceService {
-    saveAll = async (data: ReferencePayload[]) => {
-            const refs: JobReference[] = data.map((data: ReferencePayload) => JobReference.create(data));
+    saveAll = async (data: ReferenceData[]) => {
+            const refs: JobReference[] = data.map((data: ReferenceData) => new JobReference(data));
             return await referenceDao.saveAll(refs);
     };
 
-    update = async (data: ReferencePayload) => {
-            const ref = JobReference.create(data);
+    update = async (data: ReferenceData) => {
+            const ref = new JobReference(data);
             return await referenceDao.update(ref);
     };
 

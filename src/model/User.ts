@@ -1,20 +1,18 @@
 import type {Entity, NamedQueries} from "./Entity.js";
 
-export interface UserUpdate {
-    firstName?: string;
-    lastName?: string;
+export interface UserData {
+    id: number | undefined;
+    firstName: string;
+    lastName: string;
+    userName: string;
     password?: string;
-    email?: string;
-    authenticated?: boolean,
+    email: string;
+    authenticated: boolean,
     admin?: boolean
 }
 
 export default class User implements Entity {
-    #id: number
-    #userName: string
-    #email: string
-    #authenticated: boolean
-    #admin: boolean
+    #data: Partial<UserData>;
     static #table:string = "users";
     static #alias:string = "u";
     static #columns:{[k:string]: string} = {
@@ -55,64 +53,50 @@ export default class User implements Entity {
     }
 
     static transform(row:{[k:string]:any}): User {
-        return new User(
-            row["user_id"],
-            row["user_name"],
-            row["email"],
-            row["admin"]
-        )
+        return new User({
+            id: row["user_id"],
+            userName: row["user_name"],
+            email: row["email"],
+            admin: row["admin"]
+        })
     }
 
-    constructor(
-        id: number,
-        userName: string,
-        email: string,
-        admin: number
-    ) {
-        this.#id = id;
-        this.#userName = userName;
-        this.#email = email;
-        this.#authenticated = id != null;
-        this.#admin = admin === 1;
+    constructor(data: Partial<UserData>) {
+        this.#data = data;
+        this.#data.authenticated = data.id != null;
     }
 
     get admin(): boolean {
-        return this.#admin;
+        return this.#data.admin ?? false;
     }
 
-    get id(): number {
-        return this.#id;
+    get id(): number | undefined {
+        return this.#data.id;
     }
 
     get authenticated(): boolean {
-        return this.#authenticated;
+        return this.#data.authenticated ?? false;
     }
 
     get email(): string {
-        return this.#email;
+        return this.#data.email ?? "";
     }
 
 
     get userName(): string {
-        return this.#userName;
+        return this.#data.userName ?? "";
     }
 
-    update(args: UserUpdate): void {
-        // Validate properties
-        // Update properties
+
+    get data(): Partial<UserData> {
+        return structuredClone(this.#data);
     }
 
     toJSON(): unknown {
-        return {
-            "id": this.id,
-            "userName": `${this.userName}`,
-            "email": `${this.email}`,
-            "authenticated": this.authenticated,
-            "admin": this.admin,
-        }
+        return this.data;
     }
 
     toString(): string {
-        return JSON.stringify(this.toJSON());
+        return JSON.stringify(this.data);
     }
 }

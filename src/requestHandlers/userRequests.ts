@@ -33,7 +33,7 @@ export const getActiveUsers =  async (req: Request, res: Response, next: NextFun
         const users:User[] = await userService.getAllActive();
         res
             .status(200)
-            .json(users);
+            .json({users});
     } catch (e) {
         res
             .status(500)

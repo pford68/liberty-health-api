@@ -1,15 +1,12 @@
-import Person from "./Person.js";
 import {isEmail, isString} from "../util/validations.js";
 import Job from "./Job.js";
 import JobReference from "./JobReference.js";
-import Position from "./Position.js";
-import Status from "./Status.js";
 import License from "./License.js";
 import type {NamedQueries} from "./Entity.js";
-import Column from "../decorators/Column.js";
 import  Education from "./Education.js";
 
-export interface ApplicantPayload {
+
+export type ApplicationData = {
     id: number,
     firstName: string,
     lastName: string,
@@ -18,25 +15,30 @@ export interface ApplicantPayload {
     position: Partial<Position>,
     status: Partial<Status>,
     eligibleToWork: boolean,
+    jobHistory: Partial<Job>[],
+    education: Partial<Education>[],
+    references: Partial<JobReference>[],
     licenses: Partial<License>[],
-    convictions: boolean
+    convictions: boolean,
 }
 
 type ApplicantQueries = NamedQueries & {
     byEmail: string,
 }
 
+type Position = {
+    id: number,
+    title: string,
+}
 
-export default class Applicant extends Person {
-    #id: number | undefined;
-    #references: JobReference[];
-    #position: Partial<Position>;
-    #jobHistory: Job[];
-    #education: Education[];
-    #status: Partial<Status>;
-    #eligibleToWork: boolean;
-    #licences: Partial<License>[];
-    #convictions: boolean = false;
+type Status = {
+    id: number,
+    value: string,
+}
+
+
+export default class Applicant {
+    #data: Partial<ApplicationData>;
     static #table: string = "applicants a";
     static #columns: {[key:string]: string} = {
         id: "applicant_id",
@@ -71,49 +73,17 @@ export default class Applicant extends Person {
         all: "",
     }
 
-    static create(data: ApplicantPayload): Applicant {
-        if (data.position.id === undefined) {
+
+    constructor(data: Partial<ApplicationData>) {
+        if (data.position?.id === undefined) {
             throw new Error("Missing position id");
         }
-        if (data.status.id === undefined) {
+        if (data.status?.id === undefined) {
             throw new Error("Missing status id");
         }
-        return new Applicant(
-            data.id,
-            data.firstName,
-            data.lastName,
-            data.email,
-            new Position(data.position.id, data.position.title ?? ""),
-            new Status(data.status.id, data.status.value ?? ""),
-            data.phone,
-            data.eligibleToWork,
-            data.licenses,
-            data.convictions
-        );
-    }
-
-    constructor(
-        id: number | null,
-        firstName: string,
-        lastName: string,
-        email: string,
-        position: Partial<Position>,
-        status: Partial<Status>,
-        phone: string,
-        eligibleToWork: boolean,
-        licenses: Partial<License>[],
-        convictions: boolean
-    ) {
-        super(firstName, lastName, email, phone);
-        this.#id = id != null ? id : undefined;
-        this.#references = [];
-        this.#position = position;
-        this.#jobHistory = [];
-        this.#education = [];
-        this.#status = status;
-        this.#eligibleToWork = eligibleToWork;
-        this.#licences = licenses ?? [];
-        this.#convictions = convictions ?? this.#convictions;
+        this.#data = data;
+        this.#data.position = {...data.position};
+        this.#data.status = {...data.status};
     }
 
 
@@ -140,73 +110,65 @@ export default class Applicant extends Person {
     }
 
     get id(): number | undefined {
-        return this.#id;
+        return this.#data.id;
+    }
+
+    get firstName(): string {
+        return this.#data.firstName ?? "";
+    }
+
+    get lastName(): string {
+        return this.#data.lastName ?? "";
+    }
+
+    get email(): string {
+        return this.#data.email ?? "";
+    }
+
+    get phome(): string {
+        return this.#data.phone ?? "";
     }
 
     get status(): Partial<Status> {
-        return this.#status;
+        return this.#data.status ?? {};
     }
 
-    set status(value: Status) {
-        this.#status = value;
-    }
-
-    get references(): Array<JobReference> {
-        return this.#references;
-    }
-
-    set references(value: Array<JobReference>) {
-        this.#references = value;
+    get references(): Partial<JobReference>[] {
+        return this.#data.references ?? [];
     }
 
     get position(): Partial<Position> {
-        return this.#position;
+        return this.#data.position ?? {};
     }
 
-    set position(value: Partial<Position>) {
-        this.#position = value;
+    get jobHistory(): Partial<Job>[] {
+        return this.#data.jobHistory ?? [];
     }
 
-    get jobHistory(): Array<Job> {
-        return this.#jobHistory;
-    }
-
-    set jobHistory(value: Array<Job>) {
-        this.#jobHistory = value;
-    }
-
-    get education(): Education[] {
-        return this.#education;
-    }
-
-    set education(value: Education[]) {
-        this.#education = value;
+    get education(): Partial<Education>[] {
+        return this.#data.education ?? [];
     }
 
     get eligibleToWork(): boolean {
-        return this.#eligibleToWork;
+        return this.#data.eligibleToWork ?? false;
     }
 
     get licences(): Partial<License>[] {
-        return this.#licences;
+        return this.#data.licenses ?? [];
     }
 
     get convictions(): boolean {
-        return this.#convictions;
+        return this.#data.convictions ?? false;
+    }
+
+    get data(): Partial<ApplicationData> {
+        return structuredClone(this.#data);
     }
 
     get namedParameters(): string[] {
         return Object.entries(Applicant.columns).map((k, v) => {
             return `${v} = :${k}`;
         });
-    }
-
-    #validateReferences(): boolean {
-        let errors = 0;
-        this.references.forEach(ref => {
-            if (!ref.validate()) ++errors;
-        });
-        return errors === 0;
     }
 
 
@@ -217,7 +179,7 @@ export default class Applicant extends Person {
             () => this.position != undefined,
             () => isEmail(this.email),
             () => this.references.length >= 2,
-            () => this.#validateReferences(),
+            //() => this.#validateReferences(),
         ];
         for (let validation of validations) {
             if (!validation()) return false;
@@ -226,22 +188,10 @@ export default class Applicant extends Person {
     }
 
     toJSON(): unknown {
-        return {
-            id: this.id ?? undefined,
-            firstName: this.firstName,
-            lastNme: this.lastName,
-            email: this.email,
-            position: this.position,
-            references: this.references,
-            jobHistory: this.jobHistory,
-            education: this.education,
-            licenses: this.licences,
-            eligibleToWork: this.eligibleToWork,
-            convictions: this.convictions
-        };
+        return this.data;
     }
 
     toString(): string {
-        return JSON.stringify(this.toJSON());
+        return JSON.stringify(this.data);
     }
 }
