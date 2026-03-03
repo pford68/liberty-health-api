@@ -44,7 +44,7 @@ class JobDao {
         const {data} = job;
         logger.info(data)
         const stmt = new QueryBuilder()
-            .update(Job, Object.keys(data))
+            .update(Job, ...Object.keys(data))
             .build();
         const {affectedRows} = await connection.save(stmt, job.entries) ?? {};
         return affectedRows !== undefined ? affectedRows > 0 : false;

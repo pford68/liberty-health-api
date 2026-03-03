@@ -26,7 +26,7 @@ class ReferenceDao {
     async update(ref: JobReference) {
         const {data} = ref;
         const stmt = new QueryBuilder()
-            .update(JobReference, Object.keys(data))
+            .update(JobReference, ...Object.keys(data))
             .build();
         logger.debug(stmt)
         const {affectedRows} = await connection.save(stmt, ref.entries) ?? {};

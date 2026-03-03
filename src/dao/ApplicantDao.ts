@@ -48,7 +48,7 @@ class ApplicantDao {
     async update(applicant: Applicant) {
         const {data} = applicant
         const stmt = new QueryBuilder()
-            .update(Applicant, Object.keys(applicant))
+            .update(Applicant, ...Object.keys(data))
             .build();
         const {affectedRows} = await connection.save(stmt, data) ?? {};
         return (affectedRows ?? 0) > 0;

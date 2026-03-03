@@ -26,7 +26,7 @@ class LicenseDao {
     async update(license: License) {
         const {data} = license;
         const stmt = new QueryBuilder()
-            .update(License, Object.keys(data))
+            .update(License, ...Object.keys(data))
             .build();
         logger.debug(stmt)
         const {affectedRows} = await connection.save(stmt, license.entries) ?? {};
