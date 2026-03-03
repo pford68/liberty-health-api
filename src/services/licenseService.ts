@@ -1,16 +1,16 @@
-import License, {type LicensePayload} from "../model/License.js";
+import License, {type LicenseData} from "../model/License.js";
 import licenseDao from "../dao/LicenseDao.js";
 
 
 class LicenseService {
 
-    saveAll = async (data: LicensePayload[]) => {
-        const licenses: License[] = data.map((data: LicensePayload) => License.create(data));
+    saveAll = async (data: LicenseData[]) => {
+        const licenses: License[] = data.map((data: LicenseData) => new License(data));
         return await licenseDao.saveAll(licenses);
     };
 
-    update = async (data: LicensePayload) => {
-        const license = License.create(data);
+    update = async (data: LicenseData) => {
+        const license = new License(data);
         return await licenseDao.update(license);
     };
 

@@ -16,11 +16,6 @@ const app = express();
 // __dirname is not available in modules scope, so we define it
 const __dirname = import.meta.dirname;
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-app.disable('x-powered-by');  // Hide the fact that we are using express.
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors())

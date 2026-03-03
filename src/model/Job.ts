@@ -1,7 +1,6 @@
 import {isString} from "../util/validations.js";
 import type {Location} from "./Location.js";
 import type {Entity, NamedQueries} from "./Entity.js";
-import Applicant from "./Applicatant.js";
 
 export interface Company {
     name: string,
@@ -17,32 +16,23 @@ type JobQueries = NamedQueries & {
 }
 
 
-export interface JobPayload {
-    id: number | null,
-    applicantId: number,
-    title: string
-    startDate: Date
-    endDate?: Date
-    reasonForLeaving: string
-    company: Company
-    location: Location,
-    description: string,
+export interface JobData {
+    id: number | undefined;
+    applicantId: number;
+    title: string;
+    startDate: Date;
+    endDate?: Date;
+    address1: string;
+    address2: string;
+    phone: string;
+    reasonForLeaving: string;
+    company: Company;
+    location: Location;
+    description: string;
 }
 
 export default class Job implements Entity {
-
-    #id: number | null;
-    #applicantId: number;
-    #title: string;
-    #startDate?: Date;
-    #endDate?: Date;
-    #reasonForLeaving?: string;
-    #company?: Company;
-    #location?: Location;
-    #address1?: string;
-    #address2?: string;
-    #phone?: string;
-    #description?: string;
+    #data: Partial<JobData>;
     static #table:string = "job_history";
     static #alias:string = "jh";
     static #columns:{[key:string]: string} = {
@@ -70,8 +60,6 @@ export default class Job implements Entity {
         saveAll: "",
         update: ""
     };
-
-
 
     static get table(): string {
         return this.#table;
@@ -101,144 +89,95 @@ export default class Job implements Entity {
         const newRecord = Object.values(Job.#columns);
         const id = newRecord.shift();
         const table = Job.#table;
-        const placeholders = Job.namedPlaceholders;
         Job.#queries = {
             ...Job.#queries,
             byId:`SELECT * FROM ${table} WHERE ${id} = ?`,
             byApplicantId:`SELECT * FROM ${table} WHERE applicant_id = ?`,
             saveAll: `INSERT INTO ${table} (${newRecord}) VALUES ?`,
             deleteOne: `DELETE FROM ${table} WHERE ${id} = ?`,
-            update: `UPDATE ${table} SET ${placeholders.join(",")} WHERE ${id} = ?`
         };
-    }
-
-    static create(data: JobPayload): Job {
-        const job = new Job(data.id, data.title, data.applicantId);
-        job.company = data.company;
-        job.startDate = data.startDate;
-        if (data.endDate != undefined) {
-            job.endDate = data.endDate;
-        }
-        job.reasonForLeaving = data.reasonForLeaving;
-        job.location = data.location;
-        job.description = data.description;
-        return job;
     }
 
 
     static transform(row:{[p:string]: any}): Job {
-        const job = new Job(row.id, row.title, row["applicant_id"]);
-        job.company = {
-            name: row.company,
-            phone: row.phone,
-            address1: row.address1,
-            address2: row.address2,
+        const data = {
+            id: row.id,
+            title: row.title,
+            applicantId: row["applicant_id"],
+            company: {
+                name: row.company,
+                phone: row.phone,
+                address1: row.address1,
+                address2: row.address2,
+                startDate: row["start_date"],
+                endDate: row["end_date"],
+                reasonForLeaving: row["reason_ended"],
+                location: {
+                    city: row.city,
+                    state: row.state,
+                    country: row.country
+                }
+            }
         };
-        job.startDate = row["start_date"];
-        job.endDate = row["end_date"];
-        job.reasonForLeaving = row["reason_ended"]
-        job.location = {
-            city: row.city,
-            state: row.state,
-            country: row.country
-        };
-        return job;
+        return new Job(data);
     }
 
-    constructor(id:number | null, title: string, applicantId: number) {
-        this.#id = id;
-        this.#title = title;
-        this.#applicantId = applicantId;
+    constructor(data: Partial<JobData>) {
+        this.#data = data;
     }
 
-    get id(): number | null {
-        return this.#id;
+    get id(): number | undefined {
+        return this.#data.id;
     }
 
-    get applicantId(): number {
-        return this.#applicantId;
+    get applicantId(): number | undefined{
+        return this.#data.applicantId;
     }
 
     get startDate(): Date | undefined {
-        return this.#startDate;
-    }
-
-    set startDate(value: Date) {
-        this.#startDate = value;
+        return this.#data.startDate;
     }
 
     get endDate(): Date | undefined {
-        return this.#endDate;
-    }
-
-    set endDate(value: Date) {
-        this.#endDate = value;
+        return this.#data.endDate;
     }
 
     get reasonForLeaving(): string | undefined {
-        return this.#reasonForLeaving;
-    }
-
-    set reasonForLeaving(value: string) {
-        this.#reasonForLeaving = value;
+        return this.#data.reasonForLeaving;
     }
 
     get company(): Company | undefined {
-        return this.#company;
-    }
-
-    set company(value: Company) {
-        this.#company = value;
+        return this.#data.company;
     }
 
     get location(): Location | undefined {
-        return this.#location;
+        return this.#data.location;
     }
 
-    set location(value: Location) {
-        this.#location = value;
-    }
-
-
-    get title(): string {
-        return this.#title;
-    }
-
-    set title(value: string) {
-        this.#title = value;
+    get title(): string | undefined {
+        return this.#data.title;
     }
 
     get address1(): string | undefined {
-        return this.#address1;
-    }
-
-    set address1(value: string) {
-        this.#address1 = value;
+        return this.#data.address1;
     }
 
     get address2(): string | undefined {
-        return this.#address2;
-    }
-
-    set address2(value: string) {
-        this.#address2 = value;
+        return this.#data.address2;
     }
 
     get phone(): string | undefined {
-        return this.#phone;
-    }
-
-    set phone(value: string) {
-        this.#phone = value;
+        return this.#data.phone;
     }
 
     get description(): string | undefined {
-        return this.#description;
+        return this.#data.description;
     }
 
-    set description(value: string) {
-        this.#description = value;
+    get data(): Partial<JobData> {
+        return structuredClone(this.#data);
     }
+
 
     validate(): boolean {
         const validations = [
@@ -288,7 +227,7 @@ export default class Job implements Entity {
     toJSON(): {[key:string]:unknown} {
         return {
             id: this.id,
-            applicantId: this.#applicantId,
+            applicantId: this.applicantId,
             title: this.title,
             startDate: this.startDate,
             endDate: this.endDate,

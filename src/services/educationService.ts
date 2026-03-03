@@ -1,9 +1,9 @@
-import Education, {type EducationPayload} from "../model/Education.js";
+import Education, {type EducationData} from "../model/Education.js";
 import educationDao from "../dao/EducationDao.js";
 
 class EducationService {
-    saveAll = async (payload: EducationPayload[]) => {
-        const schools: Education[] = payload.map((data: EducationPayload) => Education.create(data));
+    saveAll = async (payload: EducationData[]) => {
+        const schools: Education[] = payload.map((data: EducationData) => new Education(data));
         return await educationDao.saveAll(schools);
     }
 
@@ -11,8 +11,8 @@ class EducationService {
         return await educationDao.getByApplicantId(id);
     }
 
-    update = async (payload: EducationPayload) => {
-        const school = Education.create(payload);
+    update = async (payload: EducationData) => {
+        const school = new Education(payload);
         return await educationDao.update(school);
     }
 }

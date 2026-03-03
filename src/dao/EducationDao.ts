@@ -2,6 +2,7 @@ import connection from "./connection.js";
 import Education from "../model/Education.js";
 import logger from "../logging/Logger.js";
 
+
 class EducationDao {
 
     async getById(id: number) {
@@ -28,7 +29,7 @@ class EducationDao {
 
     async saveAll(schools: Education[]) {
         const values = schools.map((school: Education) => school.values);
-        console.dir(values);
+        logger.debug(values);
 
         const {saveAll} = Education.queries;
         const result = await connection.saveAll(saveAll, [values]);
@@ -38,7 +39,7 @@ class EducationDao {
 
     async update(school: Education) {
         const {update} = Education.queries;
-        logger.info(update)
+        logger.debug(update)
         const {affectedRows} = await connection.save(update, school.entries) ?? {};
         return affectedRows !== undefined ? affectedRows > 0 : false;
     }
