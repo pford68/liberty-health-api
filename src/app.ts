@@ -1,5 +1,4 @@
 import express from "express";
-import path from "path";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
@@ -26,7 +25,7 @@ app.use("/api/form/", applicantRouter);
 app.use("/api/form/references/", referenceRouter);
 app.use("/api/form/jobs/", jobRouter);
 app.use("/api/form/schools/", educationRouter);
-app.use("/api/form/licenses/", licenseRouter)
+app.use("/api/form/licenses/", licenseRouter);
 app.use(errorHandler);
 
 export default app;
